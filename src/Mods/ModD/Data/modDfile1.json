@@ -1,0 +1,19 @@
+{
+    "data": {
+        "path": {
+            "to": {
+                "somewhere": [
+                    6
+                ],
+                "everywhere": "Venice",
+                "hidden": "secret"
+            }
+        },
+        "arrTest": [
+            7
+        ],
+        "newVal": 42
+    },
+    "targetMod": "ModA",
+    "samePathConflict": "overwrite"
+}

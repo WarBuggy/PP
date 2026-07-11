@@ -1,0 +1,30 @@
+{
+    "data": {
+        "definition": {
+            "drawLayer": {
+                "mcHeight": {
+                    "payload": {
+                        "index": 2
+                    }
+                }
+            },
+            "gameObject": {
+                "mc": {
+                    "payload": {
+                        "animation": "mc",
+                        "animationModId": "Core"
+                    }
+                }
+            },
+            "other": {
+                "screenScaling": {
+                    "payload": {
+                        "shoulderWidth": 0.41,
+                        "minVisibleDimension": 12,
+                        "prioritizeHeight": true
+                    }
+                }
+            }
+        }
+    }
+}

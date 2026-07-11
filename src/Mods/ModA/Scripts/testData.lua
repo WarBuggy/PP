@@ -1,0 +1,8 @@
+print("This is testData.lua from ModA")
+print(GameData.TryGet("path.to.nowhere"))
+print(GameData.TryGet("bkey", "ModB"))
+print(GameData.TryGet("key", "ModB"))
+GameData.Set("path.to.nowhere", "path to nowhere")
+print(GameData.TryGet("path.to.nowhere"))
+GameData.Set("bkey", "value set by mod A", "ModB")
+print(GameData.TryGet("bkey", "ModB"))

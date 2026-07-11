@@ -1,0 +1,4 @@
+{
+    "overwrite": "ModA",
+    "targetFile": "player.lua"
+}

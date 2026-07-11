@@ -1,0 +1,47 @@
+{
+    "data": {
+        "definition": {
+            "animation": {
+                "mc": {
+                    "payload": {
+                        "baseComponent": "base",
+                        "componentList": null,
+                        "components": {
+                            "base": {
+                                "defaultState": "idle",
+                                "currentState": null,
+                                "states": {
+                                    "idle": {
+                                        "currentFrame": null,
+                                        "frameList": null,
+                                        "frames": {
+                                            "0": {
+                                                "index": 0,
+                                                "layer": "mcHeight",
+                                                "width": 256,
+                                                "height": 130,
+                                                "folder": "mc/",
+                                                "file": "idle.png",
+                                                "spriteOffsetX": 0,
+                                                "spriteOffsetY": 0,
+                                                "offsetX": 0,
+                                                "offsetY": 0,
+                                                "flipX": false,
+                                                "flipY": false,
+                                                "posX": 0,
+                                                "posY": 0,
+                                                "pivotX": 128,
+                                                "pivotY": 74,
+                                                "textureId": null
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
