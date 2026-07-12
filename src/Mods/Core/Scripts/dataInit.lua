@@ -3,5 +3,4 @@ local function onDataInit()
     GameData.Set("drawLayers.layerIndexMap", LedgerMap.Create(), "Core");
 end
 
-
 Events.OnDataInit.Add(onDataInit)

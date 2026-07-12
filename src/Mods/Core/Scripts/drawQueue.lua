@@ -1,5 +1,5 @@
 -- Collect frames for a single animation
-local function collectFramesForAnimation(modId, animationName, layerIndexMap)
+local function collectFramesForAnimation(modId, animationName)
     local frames = {}
     local components = Animation.TryGetComponentList(animationName, modId)
     if not components then return frames end
@@ -18,11 +18,10 @@ local function collectFramesForAnimation(modId, animationName, layerIndexMap)
             local flipX, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipX", modId) or false
             local flipY, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipY", modId) or false
 
-            local layerName, _  = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "layer", modId) or ""
-            local layerInfo = layerName and LedgerMap.TryGet(layerIndexMap, layerName)
-            local layerOrder = layerInfo and layerInfo.position
+            local layerOrder, layerOrderExists = Animation.TryGetLayerOrder(
+                animationName, compName, state, frameKey, modId)
 
-            if layerOrder then
+            if layerOrderExists then
                 table.insert(frames, {
                     layerOrder = layerOrder,
                     textureId  = textureId,
@@ -36,7 +35,8 @@ local function collectFramesForAnimation(modId, animationName, layerIndexMap)
                     flipY      = flipY
                 })
             else
-                print(Localize("drawQueue.lua.frameLayerMissing", layerName))
+                local layerName, _ = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "layer", modId) or ""
+                print(Localize("drawQueue.lua.frameLayerMissing", animationName, compName, state, frameKey, layerName))
             end
         end
     end
@@ -54,7 +54,7 @@ local function collectAllFrames()
         return drawQueue
     end
 
-    local layerIndexMap, layerIndexMapExists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
+    local _, layerIndexMapExists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
     if not layerIndexMapExists then
         print(Localize("drawQueue.lua.drawLayersNotReady"))
         return drawQueue
@@ -65,7 +65,7 @@ local function collectAllFrames()
             local animationName = pair.Key
             local modId = pair.Value
             if type(animationName) == "string" and type(modId) == "string" then
-                local frames = collectFramesForAnimation(modId, animationName, layerIndexMap)
+                local frames = collectFramesForAnimation(modId, animationName)
                 for _, frame in ipairs(frames) do
                     table.insert(drawQueue, frame)
                 end

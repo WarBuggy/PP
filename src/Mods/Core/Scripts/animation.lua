@@ -284,6 +284,125 @@ local function processAnimation(modId, defName, components)
     return true, validCompCount, totalStateCount, totalFrameCount
 end
 
+local function createRawLayerOrder(modId, defName, comp, state, frameKey, layerOrder)
+    local path = {
+        "components",
+        comp,
+        "states",
+        state,
+        "frames",
+        frameKey,
+        "layerOrder"
+    }
+
+    local created = Definition.TryCreatePayload(
+        targetDefType,
+        defName,
+        path,
+        layerOrder,
+        modId
+    )
+
+    if not created then
+        -- Path may already exist if another system already created it.
+        -- In that case just update it.
+        Definition.SetPayload(
+            targetDefType,
+            defName,
+            path,
+            layerOrder,
+            modId
+        )
+    end
+end
+
+local function createLayerOrders(modId, defName, componentsData)
+
+    for compName, states in pairs(componentsData) do
+
+        for stateName, frames in pairs(states) do
+
+            for frameKey, _ in pairs(frames) do
+
+                local path = {
+                    "components", compName,
+                    "states", stateName,
+                    "frames", frameKey,
+                    "layerOrder"
+                }
+
+                local created = Definition.TryCreatePayload(targetDefType, defName, path, nil, modId)
+
+                if not created then
+                    print("[Animation] Failed to create layerOrder for " .. 
+                        defName .. "." .. compName .. "." .. stateName .. "." .. frameKey)
+                end
+            end
+        end
+    end
+
+end
+
+local function tryGetLayerOrder(animation, comp, state, frame, modId)
+
+    -- Check cached layerOrder first
+    local layerOrder, exists =
+        tryGetFrameProperty(
+            animation,
+            comp,
+            state,
+            frame,
+            "layerOrder",
+            modId
+        )
+
+    if exists and layerOrder ~= nil then
+        return layerOrder, true
+    end
+
+    -- Get raw layer name
+    local layer, layerExists =
+        tryGetFrameProperty(
+            animation,
+            comp,
+            state,
+            frame,
+            "layer",
+            modId
+        )
+
+    if not layerExists or type(layer) ~= "string" then
+        return nil, false
+    end
+
+    -- Resolve layer order
+    local resolvedOrder, orderExists =
+        DrawLayers.TryGetLayerOrder(layer)
+
+    if not orderExists then
+        return nil, false
+    end
+
+    -- Cache the result
+    Definition.SetPayload(
+        targetDefType,
+        animation,
+        {
+            "components",
+            comp,
+            "states",
+            state,
+            "frames",
+            frame,
+            "layerOrder"
+        },
+        resolvedOrder,
+        modId
+    )
+
+    return resolvedOrder, true
+end
+
 local function onAnimationCreated(modId, defType, defName, defPaths)
     if defType ~= targetDefType then
         return
@@ -294,6 +413,8 @@ local function onAnimationCreated(modId, defType, defName, defPaths)
     local ok, compCount, stateCount, frameCount = processAnimation(modId, defName, componentsData)
 
     if not ok then return end
+
+    createLayerOrders(modId, defName, componentsData)
 
     print(Localize("animation.lua.animationPassValidation", modId, defName, compCount, stateCount, frameCount))
 end
@@ -314,6 +435,7 @@ Animation.SetCurrentFrame = function(animation, comp, state, value, modId)
 end
 Animation.TryGetCompProperty = tryGetCompProperty
 Animation.SetCurrentState = setCurrentState
+Animation.TryGetLayerOrder = tryGetLayerOrder
 
 local function setCurrentFrameKey(animation, comp, state, frameKey, modId)
     local frameList, exists = tryGetStateProperty(animation, comp, state, "frameList", modId)

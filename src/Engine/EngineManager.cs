@@ -61,6 +61,8 @@ public class EngineManager : Game
             manager.CleanupAfterLoadEvents();
         }
 
+        DataManager.Instance.EndPathCreationPhase();
+
         BuildActionInputMap();
     }
 

@@ -45,6 +45,7 @@ local function onDrawLayerCreated(modId, defType, defName, _) -- _ because defPa
 
     -- Save back to GameData
     GameData.Set("drawLayers.layerIndexMap", newMap, "Core")
+
 end
 
 Events.OnDefinitionCreated.Add(onDrawLayerCreated)
@@ -52,6 +53,23 @@ Events.OnDefinitionCreated.Add(onDrawLayerCreated)
 
 -- DrawLayers read-only API
 DrawLayers = DrawLayers or {}
+
+function DrawLayers.TryGetLayerOrder(layerName)
+
+    local layerIndexMap, exists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
+
+    if not exists or not layerIndexMap then
+        return nil, false
+    end
+
+    local info, found = LedgerMap.TryGet(layerIndexMap, layerName)
+
+    if not found or not info then
+        return nil, false
+    end
+
+    return info.position, true
+end
 
 function DrawLayers.PrintAllWithIndex()
     local layerIndexMap, exists = GameData.TryGetFrom("drawLayers.layerIndexMap", "Core")
