@@ -2,10 +2,23 @@
     "data": {
         "localization": {
             "en-US": {
-                "animation.lua.animationMissingBaseComponent": "Mod '{0}', animation '{1}' is missing required baseComponent",
-                "animation.lua.animationInvalidBaseComponent": "Mod '{0}', animation '{1}', base component '{2}' is not a valid component",
+                "animationValidation.lua.failedToCreateRuntimeField": "Mod '{0}', animation '{1}' failed to create the following runtime field: {2}",
+                "animationValidation.lua.animationMissingProperty": "Mod '{0}', animation '{1}' is missing the following required property: {2}",
+                "animationValidation.lua.animationInvalidBaseComponent": "Mod '{0}', animation '{1}', base component '{2}' is not a valid component",
+                "animationValidation.lua.animationInvalidBaseComponentType": "Mod '{0}', animation '{1}' has an invalid baseComponent. Expected a non-empty string.",
+                "animationValidation.lua.animationNoValidComponents": "Mod '{0}', animation '{1}' has no valid component",
+                "animationValidation.lua.failedToCreatePayload": "Mod '{0}', animation '{1}' failed to create payload '{2}'",
+                "animationValidation.lua.frameInvalidLayer": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' references invalid layer '{5}'",
+                "animationValidation.lua.frameMissingProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' is missing required property '{5}'",
+                "animationValidation.lua.frameMissingCascadeProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' cannot resolve cascade property '{5}'",
+                "animationValidation.lua.stateMissingProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}' is missing required property '{4}'",
+                "animationValidation.lua.stateNoValidFrames": "Mod '{0}', animation '{1}', component '{2}', state '{3}' has no valid frames",
+                "animationValidation.lua.compMissingProperty": "Mod '{0}', animation '{1}', component '{2}' is missing required property '{3}'",
+                "animationValidation.lua.compInvalidDefaultStateType": "Mod '{0}', animation '{1}', component '{2}' has an invalid defaultState. Expected a string.",
+                "animationValidation.lua.compNoValidStates": "Mod '{0}', animation '{1}', component '{2}' has no valid states",
+                "animationValidation.lua.compInvalidDefaultState": "Mod '{0}', animation '{1}', component '{2}' references invalid defaultState '{3}'",
+                "": "",
                 "animation.lua.animationMissingComponentList": "Mod '{0}', animation '{1}' is missing required componentList",
-                "animation.lua.animationNoValidComponents": "Mod '{0}', animation '{1}' has no valid component",
                 "animation.lua.frameMissingRequiredProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' is missing property '{5}'",
                 "animation.lua.framePropertyWithInvalidValue": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}', property '{5}' has invalid value. Expect {6}, not {7}",
                 "animation.lua.stateMissingProperty": "Mod '{0}', animation '{1}', component '{2}, state '{3}' is missing property '{4}'",
@@ -20,8 +33,6 @@
                 "animationUtils.lua.componentsMissing": "No components found for animation '{0}'",
                 "drawLayer.lua.missingIndex": "Draw layer '{0}' is missing payload index",
                 "drawLayer.lua.notInitialized": "DrawLayers layerIndexMap not initialized before definitions were created",
-                "drawQueue.lua.frameLayerMissing": "Animation '{0}' component '{1}' state '{2}' frame '{3}' references unknown layer '{4}'",
-                "drawQueue.lua.drawLayersNotReady": "Draw layers are not initialized; draw queue cannot be built",
                 "drawQueue.lua.noGowiLedgerFound": "No gowi ledger found"
             }
         }

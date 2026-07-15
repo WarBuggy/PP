@@ -1,3 +1,36 @@
+
+local function tryGetFrameLayerOrder(animationName, compName, stateName, frameKey, modId)
+
+    -- Check cached layerOrder first
+    local layerOrder, exists = Animation.TryGetFrameProperty(
+            animationName, compName, stateName, frameKey, "layerOrder", modId)
+
+    if exists and layerOrder ~= nil then
+        return layerOrder, true
+    end
+
+    -- Get raw layer name
+    local layerName, layerExists = Animation.TryGetFrameProperty( 
+            animationName, compName, stateName, frameKey, "layer", modId)
+
+    if not layerExists or type(layerName) ~= "string" then
+        return nil, false
+    end
+
+    -- Resolve layer order
+    local resolvedOrder, orderExists = DrawLayers.TryGetLayerOrder(layerName)
+
+    if not orderExists then
+        return nil, false
+    end
+
+    -- Cache resolved value
+    Animation.SetFrameProperty(
+        animationName, compName, stateName, frameKey, "layerOrder", resolvedOrder, modId)
+
+    return resolvedOrder, true
+end
+
 -- Collect frames for a single animation
 local function collectFramesForAnimation(modId, animationName)
     local frames = {}
@@ -17,27 +50,20 @@ local function collectFramesForAnimation(modId, animationName)
             local offsetY, _    = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "offsetY", modId) or 0
             local flipX, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipX", modId) or false
             local flipY, _      = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "flipY", modId) or false
-
-            local layerOrder, layerOrderExists = Animation.TryGetLayerOrder(
-                animationName, compName, state, frameKey, modId)
-
-            if layerOrderExists then
-                table.insert(frames, {
-                    layerOrder = layerOrder,
-                    textureId  = textureId,
-                    posX       = posX,
-                    posY       = posY,
-                    width      = width,
-                    height     = height,
-                    offsetX    = offsetX,
-                    offsetY    = offsetY,
-                    flipX      = flipX,
-                    flipY      = flipY
-                })
-            else
-                local layerName, _ = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "layer", modId) or ""
-                print(Localize("drawQueue.lua.frameLayerMissing", animationName, compName, state, frameKey, layerName))
-            end
+            local layerOrder, _ = tryGetFrameLayerOrder(animationName, compName, state, frameKey, modId) 
+            
+            table.insert(frames, {
+                layerOrder = layerOrder,
+                textureId  = textureId,
+                posX       = posX,
+                posY       = posY,
+                width      = width,
+                height     = height,
+                offsetX    = offsetX,
+                offsetY    = offsetY,
+                flipX      = flipX,
+                flipY      = flipY 
+            })
         end
     end
 
@@ -51,12 +77,6 @@ local function collectAllFrames()
     local gowiLedger, exists = GameData.TryGet("gowi.list", "Core")
     if not exists or not gowiLedger then
         print(Localize("drawQueue.lua.noGowiLedgerFound"))
-        return drawQueue
-    end
-
-    local _, layerIndexMapExists = GameData.TryGet("drawLayers.layerIndexMap", "Core")
-    if not layerIndexMapExists then
-        print(Localize("drawQueue.lua.drawLayersNotReady"))
         return drawQueue
     end
 

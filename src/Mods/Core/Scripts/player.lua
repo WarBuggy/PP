@@ -52,4 +52,4 @@ local function updateAnimationPlayer(deltaTime, totalTime)
     LedgerMap.Set(gowiLedger, animationName, "Core")
 end
 
---Events.OnUpdate.Add(updateAnimationPlayer)
+Events.OnUpdate.Add(updateAnimationPlayer)
