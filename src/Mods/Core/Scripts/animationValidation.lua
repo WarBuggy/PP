@@ -44,8 +44,8 @@ local CASCADE_FIELDS = {
     offsetY       = { required = false, default = 0 },
     flipX         = { required = false, default = false, },
     flipY         = { required = false, default = false, },
-    posX          = { required = false, default = 0 },
-    posY          = { required = false, default = 0 },
+    x             = { required = false, default = 0 },
+    y             = { required = false, default = 0 },
     pivotX        = { required = false, default = 0 },
     pivotY        = { required = false, default = 0 },
 }

@@ -14,12 +14,12 @@ local function centerFrameOnScreen(animationName, componentName, stateName, fram
     local centerY = screenHeight * 0.5
 
     -- Convert to top-left position, respecting frame size
-    local posX = centerX - (frameWidth * 0.5)
-    local posY = centerY - (frameHeight * 0.5)
+    local x = centerX - (frameWidth * 0.5)
+    local y = centerY - (frameHeight * 0.5)
 
     -- Apply per-frame position
-    Animation.SetFrameProperty(animationName, componentName, stateName, frameName, "posX", posX, owningModId)
-    Animation.SetFrameProperty(animationName, componentName, stateName, frameName, "posY", posY, owningModId)
+    Animation.SetFrameProperty(animationName, componentName, stateName, frameName, "x", x, owningModId)
+    Animation.SetFrameProperty(animationName, componentName, stateName, frameName, "y", y, owningModId)
 end
 
 -- Positions all non-base components relative to base component
@@ -37,8 +37,8 @@ local function positionAnimationComponents(animationName, modId)
     -- Get base component's current state and frame
     local baseState = Animation.TryGetCompProperty(animationName, baseCompName, "currentState", owningModId)
     local baseFrameIndex, baseFrameKey, _ = Animation.TryGetCurrentFrameInfo(animationName, baseCompName, baseState, owningModId)
-    local basePosX, _     = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "posX", owningModId) or 0
-    local basePosY, _     = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "posY", owningModId) or 0
+    local baseX, _     = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "x", owningModId) or 0
+    local baseY, _     = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "y", owningModId) or 0
     local baseOffsetX, _  = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "offsetX", owningModId) or 0
     local baseOffsetY, _  = Animation.TryGetFrameProperty(animationName, baseCompName, baseState, baseFrameKey, "offsetY", owningModId) or 0
 
@@ -55,10 +55,10 @@ local function positionAnimationComponents(animationName, modId)
             local frameIndex, frameKey, _ = Animation.TryGetCurrentFrameInfo(animationName, compName, state, owningModId)
             local frameOffsetX, _ = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "offsetX", owningModId) or 0
             local frameOffsetY, _ = Animation.TryGetFrameProperty(animationName, compName, state, frameKey, "offsetY", owningModId) or 0
-            local posX = basePosX + frameOffsetX - baseOffsetX
-            local posY = basePosY + frameOffsetY - baseOffsetY
-            Animation.SetFrameProperty(animationName, compName, state, frameKey, "posX", posX, owningModId)
-            Animation.SetFrameProperty(animationName, compName, state, frameKey, "posY", posY, owningModId)
+            local x = baseX + frameOffsetX - baseOffsetX
+            local y = baseY + frameOffsetY - baseOffsetY
+            Animation.SetFrameProperty(animationName, compName, state, frameKey, "x", x, owningModId)
+            Animation.SetFrameProperty(animationName, compName, state, frameKey, "y", y, owningModId)
         end
     end
 end

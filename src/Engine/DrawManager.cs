@@ -24,34 +24,14 @@ public sealed class DrawManager : LoggerBaseCore
     }
 
     /// <summary>
-    /// Adds a draw request to the queue.
+    /// Adds a render request to the queue.
     /// </summary>
-    public void AddRequest(Texture2D texture, Vector2 position,
-                      float rotation = 0f, Vector2 scale = default,
-                      Color? color = null, float layerDepth = 0f,
-                      int width = 0, int height = 0,
-                      int spriteOffsetX = 0, int spriteOffsetY = 0,
-                      bool flipX = false, bool flipY = false)
+    public void AddRequest(DrawRequest request)
     {
-        if (texture == null)
-            throw new LocalizedErrorCore<ArgumentNullException>("system.drawManager.textureNull");
+        if (request == null)
+            throw new LocalizedErrorCore<ArgumentNullException>("system.drawManager.requestNull");
 
-        if (scale == default)
-            scale = Vector2.One;
-
-        var sourceRect = new Rectangle(spriteOffsetX, spriteOffsetY, width, height);
-        _drawQueue.Add(new DrawRequest
-        {
-            Texture = texture,
-            Position = position,
-            SourceRectangle = sourceRect,
-            Rotation = rotation,
-            Scale = scale,
-            Color = color ?? Color.White,
-            LayerDepth = layerDepth,
-            FlipX = flipX,
-            FlipY = flipY
-        });
+        _drawQueue.Add(request);
     }
 
     /// <summary>
@@ -71,61 +51,84 @@ public sealed class DrawManager : LoggerBaseCore
                 case DrawRequestType.Rectangle:
                     DrawRectangle(spriteBatch, req);
                     break;
+
+                default:
+                    LogWarning("system.drawManager.unknownRequestType", req.Type);
+                    break;
             }
         }
 
         _drawQueue.Clear();
     }
 
-    public void AddRectangle(Vector2 position,
-        float width, float height, float r, float g, float b, float layerDepth = 0f)
-    {
-        _drawQueue.Add(new DrawRequest
-        {
-            Type = DrawRequestType.Rectangle,
-            Position = position,
-            SpecialData = [width, height],
-            Color = new Color((byte)r, (byte)g, (byte)b),
-            LayerDepth = layerDepth
-        });
-    }
-
     private void DrawRectangle(SpriteBatch spriteBatch, DrawRequest req)
     {
-        if (req.SpecialData == null || req.SpecialData.Length < 2)
+        float width = GetFloatData(req, "width");
+        float height = GetFloatData(req, "height");
+
+        if (width <= 0 || height <= 0)
             return;
 
         spriteBatch.Draw(
             _primitiveTexture,
-            req.Position,
+            new Vector2(req.X, req.Y),
             null,
-            req.Color,
-            0f,
-            Vector2.Zero,
-           new Vector2(req.SpecialData[0], req.SpecialData[1]),
+            req.GetColor(),
+            req.Rotation,
+            new Vector2(req.PivotX, req.PivotY),
+            new Vector2(width * req.ScaleX,
+                        height * req.ScaleY),
             SpriteEffects.None,
-            req.LayerDepth
-        );
+            req.LayerDepth);
     }
 
     private static void DrawSprite(SpriteBatch spriteBatch, DrawRequest req)
     {
+        int textureId = GetIntData(req, "textureId");
+
+        if (textureId < 0)
+            return;
+
+
+        if (!TextureManager.Instance.TryGetTexture(textureId, out Texture2D texture))
+        {
+            return;
+        }
+
+        int width = GetIntData(req, "width");
+        int height = GetIntData(req, "height");
+
+        if (width <= 0 || height <= 0)
+            return;
+
+        int offsetX = GetIntData(req, "offsetX");
+        int offsetY = GetIntData(req, "offsetY");
+
+        bool flipX = GetBoolData(req, "flipX");
+        bool flipY = GetBoolData(req, "flipY");
+
+        Rectangle sourceRectangle = new(
+            offsetX,
+            offsetY,
+            width,
+            height);
+
         SpriteEffects effects = SpriteEffects.None;
 
-        if (req.FlipX)
+        if (flipX)
             effects |= SpriteEffects.FlipHorizontally;
 
-        if (req.FlipY)
+        if (flipY)
             effects |= SpriteEffects.FlipVertically;
 
         spriteBatch.Draw(
-            req.Texture,
-            req.Position,
-            req.SourceRectangle,
-            req.Color,
+            texture,
+            new Vector2(req.X, req.Y),
+            sourceRectangle,
+            req.GetColor(),
             req.Rotation,
-            Vector2.Zero,
-            req.Scale,
+            new Vector2(req.PivotX, req.PivotY),
+            new Vector2(req.ScaleX, req.ScaleY),
             effects,
             req.LayerDepth
         );
@@ -136,26 +139,93 @@ public sealed class DrawManager : LoggerBaseCore
     /// </summary>
     public class DrawRequest
     {
+        /// <summary>
+        /// Determines which renderer handles this request.
+        /// </summary>
         public DrawRequestType Type { get; set; }
-        public Texture2D Texture { get; set; } = null;
-        public Vector2 Position { get; set; }
-        public Rectangle SourceRectangle { get; set; }
-        public float Rotation { get; set; }
-        public Vector2 Scale { get; set; } = Vector2.One;
-        public Color Color { get; set; } = Color.White;
-        public float LayerDepth { get; set; } = 0f;
-        public bool FlipX { get; set; } = false;  // new property
-        public bool FlipY { get; set; } = false;  // new property
 
-        // Shape-specific
-        public float[] SpecialData { get; set; }
+        /// <summary>
+        /// Render position.
+        /// </summary>
+        public float X { get; set; }
+        public float Y { get; set; }
+
+        /// <summary>
+        /// Rotation in radians.
+        /// </summary>
+        public float Rotation { get; set; } = 0f;
+
+        /// <summary>
+        /// Global render scale.
+        /// </summary>
+        public float ScaleX { get; set; } = 1f;
+        public float ScaleY { get; set; } = 1f;
+
+        /// <summary>
+        /// Pivot/origin point used by renderers.
+        /// 
+        /// Example:
+        /// Sprite:
+        /// {
+        ///     pivotX,
+        ///     pivotY
+        /// }
+        /// </summary>
+        public float PivotX { get; set; } = 0f;
+        public float PivotY { get; set; } = 0f;
+
+        /// <summary>
+        /// Color channels.
+        /// </summary>
+        public byte R { get; set; } = 255;
+        public byte G { get; set; } = 255;
+        public byte B { get; set; } = 255;
+        public byte A { get; set; } = 255;
+
+        /// <summary>
+        /// Draw ordering value.
+        /// </summary>
+        public float LayerDepth { get; set; } = 0f;
+
+        public Dictionary<string, object> Data { get; set; } = [];
+
+        public Color GetColor()
+        {
+            return new Color(this.R, this.G, this.B, this.A);
+        }
     }
 
     public enum DrawRequestType
     {
         Sprite,
         Rectangle,
-        Line,
-        Circle
     }
+
+    #region Get data helpers
+
+    private static int GetIntData(DrawRequest req, string key)
+    {
+        if (!req.Data.TryGetValue(key, out var value))
+            return 0;
+
+        return Convert.ToInt32(value);
+    }
+
+    private static float GetFloatData(DrawRequest req, string key)
+    {
+        if (!req.Data.TryGetValue(key, out var value))
+            return 0f;
+
+        return Convert.ToSingle(value);
+    }
+
+    private static bool GetBoolData(DrawRequest req, string key)
+    {
+        if (!req.Data.TryGetValue(key, out var value))
+            return false;
+
+        return Convert.ToBoolean(value);
+    }
+
+    #endregion
 }

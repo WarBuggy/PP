@@ -14,12 +14,13 @@ public sealed class TextureManager
     private readonly LoggerBaseCore _logger = new();
     private static readonly string SPRITE_FOLDER = "Sprites/";
 
-    // Dictionary<modId, Dictionary<textureId, (path, texture)>>
-    private readonly Dictionary<string, Dictionary<int, (string path, Texture2D texture)>> _textures = new(StringComparer.OrdinalIgnoreCase);
-    // Dictionary<modId, Dictionary<path, textureId>>
-    private readonly Dictionary<string, Dictionary<string, int>> _pathToId = new(StringComparer.OrdinalIgnoreCase);
-    // Incremental ID generator per mod
-    private readonly Dictionary<string, int> _nextId = new(StringComparer.OrdinalIgnoreCase);
+    // Global texture registry
+    // Dictionary<textureId, texture entry>
+    private readonly Dictionary<int, TextureEntry> _textures = [];
+    // Dictionary<full path, textureId>
+    private readonly Dictionary<string, int> _pathToId = new(StringComparer.OrdinalIgnoreCase);
+    // Global ID generator
+    private int _nextId = 1;
 
     private TextureManager() { }
 
@@ -30,31 +31,12 @@ public sealed class TextureManager
     public int RegisterTexture(string modId, string sourceModId, string folder, string file)
     {
         var modFolderPath = ModManager.Instance.GetModFolderPath(sourceModId);
-        string path = Path.Combine(modFolderPath, SPRITE_FOLDER, folder, file);
-        // Ensure mod dictionaries exist
-        if (!_textures.TryGetValue(modId, out var modTextures))
-        {
-            modTextures = [];
-            _textures[modId] = modTextures;
-        }
 
-        if (!_pathToId.TryGetValue(modId, out var modPathToId))
-        {
-            modPathToId = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            _pathToId[modId] = modPathToId;
-        }
+        string path = Path.GetFullPath(Path.Combine(
+            modFolderPath, SPRITE_FOLDER, folder, file));
 
-        if (!_nextId.TryGetValue(modId, out var nextId))
-        {
-            nextId = 1;
-            _nextId[modId] = nextId;
-        }
-
-        // Check if path already loaded
-        if (modPathToId.TryGetValue(path, out var existingId))
-        {
+        if (_pathToId.TryGetValue(path, out int existingId))
             return existingId;
-        }
 
         // Load texture from file
         if (!File.Exists(path))
@@ -64,28 +46,52 @@ public sealed class TextureManager
         var texture = Texture2D.FromStream(EngineManager.Instance.GraphicsDevice, stream);
 
         // Assign ID
-        int textureId = nextId;
-        nextId++;
-        _nextId[modId] = nextId;
+        int textureId = _nextId;
+        _nextId++;
 
-        // Store in dictionaries
-        modTextures[textureId] = (path, texture);
-        modPathToId[path] = textureId;
+        _textures[textureId] = new TextureEntry
+        {
+            RegisterModId = modId,
+            Path = path,
+            Texture = texture
+        };
+
+        _pathToId[path] = textureId;
 
         _logger.Log("system.textureManager.registered", modId, path, textureId);
         return textureId;
     }
 
     /// <summary>
-    /// Get a Texture2D by modId and textureId.
+    /// Gets a texture by global texture ID.
     /// </summary>
-    public Texture2D GetTexture(string modId, int textureId)
+    public bool TryGetTexture(int textureId, out Texture2D? texture)
     {
-        if (_textures.TryGetValue(modId, out var modTextures) &&
-            modTextures.TryGetValue(textureId, out var tuple))
+        if (_textures.TryGetValue(textureId, out var entry))
         {
-            return tuple.texture;
+            texture = entry.Texture;
+            return true;
         }
-        throw new LocalizedErrorCore<KeyNotFoundException>("system.textureManager.textureNotFound", modId, textureId);
+
+        _logger.LogWarning("system.drawManager.textureNotFound", textureId);
+        texture = null;
+        return false;
+    }
+
+
+    /// <summary>
+    /// Gets metadata for a texture.
+    /// </summary>
+    public bool TryGetTextureInfo(int textureId, out TextureEntry entry)
+    {
+        return _textures.TryGetValue(textureId, out entry);
+    }
+
+
+    public sealed class TextureEntry
+    {
+        public string RegisterModId { get; init; } = "";
+        public string Path { get; init; } = "";
+        public Texture2D Texture { get; init; } = null!;
     }
 }

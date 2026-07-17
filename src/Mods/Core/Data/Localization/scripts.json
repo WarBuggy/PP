@@ -33,7 +33,7 @@
                 "animationUtils.lua.componentsMissing": "No components found for animation '{0}'",
                 "drawLayer.lua.missingIndex": "Draw layer '{0}' is missing payload index",
                 "drawLayer.lua.notInitialized": "DrawLayers layerIndexMap not initialized before definitions were created",
-                "drawQueue.lua.noGowiLedgerFound": "No gowi ledger found"
+                "drawQueue.lua.noDrawRequestLedgerFound": "No draw request ledger found"
             }
         }
     }

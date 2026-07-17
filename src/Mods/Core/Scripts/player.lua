@@ -47,9 +47,19 @@ local function updateAnimationPlayer(deltaTime, totalTime)
     AnimationUtils.CenterFrameOnScreen(animationName, baseCompName, compBaseNewState, frameKey)
     AnimationUtils.PositionAnimationComponents(animationName)
 
-    -- Update gowi ledger
-    local gowiLedger, exists = GameData.TryGet("gowi.list", "Core")
-    LedgerMap.Set(gowiLedger, animationName, "Core")
+    local drawRequestLedger, exists = GameData.TryGet("drawRequest.list", "Core")
+    if exists and drawRequestLedger then
+        local requests = Animation.CreateDrawRequests("Core", animationName)
+        
+        if requests == nil then
+            print("CreateDrawRequests returned nil")
+            return
+        end
+
+        for index, request in ipairs(requests) do
+            LedgerArray.InsertLast(drawRequestLedger, request)
+        end
+    end
 end
 
 Events.OnUpdate.Add(updateAnimationPlayer)

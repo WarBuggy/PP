@@ -76,7 +76,7 @@ public class EngineManager : Game
             Exit();
             return;
         }
-        DataManager.Instance.SetData(ModSystemPolicy.CORE_MOD_ID, "gowi.list", ModSystemPolicy.CORE_MOD_ID, new LedgerMap());
+        DataManager.Instance.SetData(ModSystemPolicy.CORE_MOD_ID, "drawRequest.list", ModSystemPolicy.CORE_MOD_ID, new LedgerArray());
         CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
