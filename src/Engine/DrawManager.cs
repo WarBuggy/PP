@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PP.Core;
@@ -79,7 +80,7 @@ public sealed class DrawManager : LoggerBaseCore
             new Vector2(width * req.ScaleX,
                         height * req.ScaleY),
             SpriteEffects.None,
-            req.LayerDepth);
+            0);
     }
 
     private static void DrawSprite(SpriteBatch spriteBatch, DrawRequest req)
@@ -130,7 +131,7 @@ public sealed class DrawManager : LoggerBaseCore
             new Vector2(req.PivotX, req.PivotY),
             new Vector2(req.ScaleX, req.ScaleY),
             effects,
-            req.LayerDepth
+            0
         );
     }
 
@@ -182,16 +183,29 @@ public sealed class DrawManager : LoggerBaseCore
         public byte B { get; set; } = 255;
         public byte A { get; set; } = 255;
 
-        /// <summary>
-        /// Draw ordering value.
-        /// </summary>
-        public float LayerDepth { get; set; } = 0f;
-
         public Dictionary<string, object> Data { get; set; } = [];
 
         public Color GetColor()
         {
             return new Color(this.R, this.G, this.B, this.A);
+        }
+
+        public override string ToString()
+        {
+            string data = Data.Count == 0
+                ? "{}"
+                : "{" + string.Join(", ",
+                    Data.Select(kvp => $"{kvp.Key}={kvp.Value}")) + "}";
+
+            return
+                $"DrawRequest(" +
+                $"Type={Type}, " +
+                $"Position=({X}, {Y}), " +
+                $"Rotation={Rotation}, " +
+                $"Scale=({ScaleX}, {ScaleY}), " +
+                $"Pivot=({PivotX}, {PivotY}), " +
+                $"Color=({R}, {G}, {B}, {A}), " +
+                $"Data={data})";
         }
     }
 

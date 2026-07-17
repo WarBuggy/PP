@@ -33,7 +33,10 @@
                 "animationUtils.lua.componentsMissing": "No components found for animation '{0}'",
                 "drawLayer.lua.missingIndex": "Draw layer '{0}' is missing payload index",
                 "drawLayer.lua.notInitialized": "DrawLayers layerIndexMap not initialized before definitions were created",
-                "drawQueue.lua.noDrawRequestLedgerFound": "No draw request ledger found"
+                "drawQueue.lua.noDrawRequestLedgerFound": "No draw request ledger found",
+                "drawQueue.lua.requestMustBeTable": "Input must be a LUA table to be added to draw queue",
+                "basicShape.lua.requestMustBeTable": "BasicShape.CreateRectDrawRequest expects a table",
+                "basicShape.lua.rectSizeRequired": "BasicShape.CreateRectDrawRequest requires width and height"
             }
         }
     }

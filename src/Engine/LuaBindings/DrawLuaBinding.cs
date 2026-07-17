@@ -74,13 +74,6 @@ public sealed class DrawLuaBinding : LuaBindingBase
                 Assign = (r, v) => r.PivotY = (float)v
             },
 
-            ["layerDepth"] = new()
-            {
-                HasDefaultValue = true,
-                DefaultValue = 0f,
-                Parse = d => Convert.ToSingle(d.Number),
-                Assign = (r, v) => r.LayerDepth = (float)v
-            },
             ["r"] = new()
             {
                 HasDefaultValue = true,

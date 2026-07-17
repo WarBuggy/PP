@@ -152,7 +152,6 @@ local function onAnimationCreated(modId, defType, defName, defPaths)
 end
 
 local function createDrawRequests(modId, animationName)
-
     local requests = {}
 
     local components = tryGetComponentList(animationName, modId)
@@ -180,12 +179,7 @@ local function createDrawRequests(modId, animationName)
 
                         local value, _ =
                             tryGetFrameProperty(
-                                animationName,
-                                compName,
-                                state,
-                                frameKey,
-                                propertyName,
-                                modId)
+                                animationName, compName, state, frameKey, propertyName, modId)
 
                         if value ~= nil then
                             request[propertyName] = value
@@ -194,14 +188,8 @@ local function createDrawRequests(modId, animationName)
 
                     local layerOrder, _ =
                         tryGetFrameLayerOrder(
-                            animationName,
-                            compName,
-                            state,
-                            frameKey,
-                            modId)
-
+                            animationName, compName, state, frameKey, modId) 
                     request.layerOrder = layerOrder or 0
-
                     table.insert(requests, request)
                 end
             end

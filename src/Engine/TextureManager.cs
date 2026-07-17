@@ -65,7 +65,7 @@ public sealed class TextureManager
     /// <summary>
     /// Gets a texture by global texture ID.
     /// </summary>
-    public bool TryGetTexture(int textureId, out Texture2D? texture)
+    public bool TryGetTexture(int textureId, out Texture2D texture)
     {
         if (_textures.TryGetValue(textureId, out var entry))
         {
