@@ -20,6 +20,7 @@ public class EngineManager : Game
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private const float FrameDuration = 0.12f;
+    private LedgerArray _drawRequestList = null!;
 
     private readonly Dictionary<string, ActionInput> _actionInputBindings = [];
 
@@ -64,6 +65,8 @@ public class EngineManager : Game
         DataManager.Instance.EndPathCreationPhase();
 
         BuildActionInputMap();
+
+        InitDrawRequestList();
     }
 
     protected override void Update(GameTime gameTime)
@@ -76,7 +79,7 @@ public class EngineManager : Game
             Exit();
             return;
         }
-        DataManager.Instance.SetData(ModSystemPolicy.CORE_MOD_ID, "drawRequest.list", ModSystemPolicy.CORE_MOD_ID, new LedgerArray());
+        _drawRequestList.ClearWithoutTracking();
         CreateActiveActionList(Keyboard.GetState(), GamePad.GetState(0), Mouse.GetState());
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
@@ -237,6 +240,17 @@ public class EngineManager : Game
 
             _actionInputBindings[action] = actionInput;
         }
+    }
+
+    private void InitDrawRequestList()
+    {
+        _drawRequestList = new LedgerArray();
+
+        DataManager.Instance.SetData(
+            ModSystemPolicy.CORE_MOD_ID,
+            "drawRequest.list",
+            ModSystemPolicy.CORE_MOD_ID,
+            _drawRequestList);
     }
 
     private enum InputDeviceType
