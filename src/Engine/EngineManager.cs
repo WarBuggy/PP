@@ -67,6 +67,8 @@ public class EngineManager : Game
         BuildActionInputMap();
 
         InitDrawRequestList();
+
+        ScriptManager.Instance.Fire(LuaGameEvents.OnGameEngineReady, DynValue.Nil);
     }
 
     protected override void Update(GameTime gameTime)

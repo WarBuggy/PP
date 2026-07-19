@@ -53,6 +53,10 @@ public sealed class DrawManager : LoggerBaseCore
                     DrawRectangle(spriteBatch, req);
                     break;
 
+                case DrawRequestType.Line:
+                    DrawLine(spriteBatch, req);
+                    break;
+
                 default:
                     LogWarning("system.drawManager.unknownRequestType", req.Type);
                     break;
@@ -135,6 +139,36 @@ public sealed class DrawManager : LoggerBaseCore
         );
     }
 
+    private void DrawLine(SpriteBatch spriteBatch, DrawRequest req)
+    {
+        float endX = GetFloatData(req, "endX");
+        float endY = GetFloatData(req, "endY");
+        float thickness = GetFloatData(req, "thickness", 1f);
+
+        Vector2 start = new(req.X, req.Y);
+        Vector2 end = new(endX, endY);
+
+        Vector2 delta = end - start;
+
+        float length = delta.Length();
+
+        if (length <= 0)
+            return;
+
+        float rotation = MathF.Atan2(delta.Y, delta.X);
+
+        spriteBatch.Draw(
+            _primitiveTexture,
+            start,
+            null,
+            req.GetColor(),
+            rotation,
+            new Vector2(0, 0.5f),
+            new Vector2(length, thickness),
+            SpriteEffects.None,
+            0);
+    }
+
     /// <summary>
     /// A single draw request.
     /// </summary>
@@ -182,8 +216,8 @@ public sealed class DrawManager : LoggerBaseCore
         public byte G { get; set; } = 255;
         public byte B { get; set; } = 255;
         public byte A { get; set; } = 255;
-
         public Dictionary<string, object> Data { get; set; } = [];
+        public int LayerOrder { get; set; } = 0;
 
         public Color GetColor()
         {
@@ -205,6 +239,7 @@ public sealed class DrawManager : LoggerBaseCore
                 $"Scale=({ScaleX}, {ScaleY}), " +
                 $"Pivot=({PivotX}, {PivotY}), " +
                 $"Color=({R}, {G}, {B}, {A}), " +
+                $"LayerOrder=({LayerOrder}), " +
                 $"Data={data})";
         }
     }
@@ -213,6 +248,7 @@ public sealed class DrawManager : LoggerBaseCore
     {
         Sprite,
         Rectangle,
+        Line,
     }
 
     #region Get data helpers
@@ -225,10 +261,10 @@ public sealed class DrawManager : LoggerBaseCore
         return Convert.ToInt32(value);
     }
 
-    private static float GetFloatData(DrawRequest req, string key)
+    private static float GetFloatData(DrawRequest req, string key, float defaultValue = 0f)
     {
         if (!req.Data.TryGetValue(key, out var value))
-            return 0f;
+            return defaultValue;
 
         return Convert.ToSingle(value);
     }

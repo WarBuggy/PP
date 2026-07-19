@@ -17,7 +17,6 @@
                 "animationValidation.lua.compInvalidDefaultStateType": "Mod '{0}', animation '{1}', component '{2}' has an invalid defaultState. Expected a string.",
                 "animationValidation.lua.compNoValidStates": "Mod '{0}', animation '{1}', component '{2}' has no valid states",
                 "animationValidation.lua.compInvalidDefaultState": "Mod '{0}', animation '{1}', component '{2}' references invalid defaultState '{3}'",
-                "": "",
                 "animation.lua.animationMissingComponentList": "Mod '{0}', animation '{1}' is missing required componentList",
                 "animation.lua.frameMissingRequiredProperty": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}' is missing property '{5}'",
                 "animation.lua.framePropertyWithInvalidValue": "Mod '{0}', animation '{1}', component '{2}', state '{3}', frame '{4}', property '{5}' has invalid value. Expect {6}, not {7}",
@@ -36,7 +35,12 @@
                 "drawQueue.lua.noDrawRequestLedgerFound": "No draw request ledger found",
                 "drawQueue.lua.requestMustBeTable": "Input must be a LUA table to be added to draw queue",
                 "basicShape.lua.requestMustBeTable": "BasicShape.CreateRectDrawRequest expects a table",
-                "basicShape.lua.rectSizeRequired": "BasicShape.CreateRectDrawRequest requires width and height"
+                "basicShape.lua.rectSizeRequired": "BasicShape.CreateRectDrawRequest requires width and height",
+                "basicShape.lua.lineEndPointRequired": "Line draw request requires both endX and endY",
+                "playableBox.lua.missingSettingParam": "World view setting '{0}/{1}' is missing one or more required payload fields",
+                "playableBox.lua.invalidPrimaryDimension": "Invalid primaryDimension '{0}'. Expected 'width' or 'height'",
+                "playableBox.lua.invalidHorizontalAlign": "Invalid horizontalAlign '{0}'. Expected 'left', 'center', or 'right'",
+                "playableBox.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'"
             }
         }
     }

@@ -12,7 +12,8 @@ public sealed class DrawLuaBinding : LuaBindingBase
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["sprite"] = DrawRequestType.Sprite,
-            ["rectangle"] = DrawRequestType.Rectangle
+            ["rectangle"] = DrawRequestType.Rectangle,
+            ["line"] = DrawRequestType.Line,
         };
 
     private static readonly Dictionary<string, ReservedField> ReservedFields =
@@ -104,10 +105,17 @@ public sealed class DrawLuaBinding : LuaBindingBase
                 DefaultValue = (byte)255,
                 Parse = d => Convert.ToByte(d.Number),
                 Assign = (r, v) => r.A = (byte)v
-            }
+            },
+            ["layerOrder"] = new()
+            {
+                HasDefaultValue = true,
+                DefaultValue = 0,
+                Parse = d => Convert.ToInt32(d.Number),
+                Assign = (r, v) => r.LayerOrder = (int)v
+            },
         };
 
-    private static readonly HashSet<string> IgnoredFields =
+    private static readonly HashSet<string> EngineFields =
         [
             "type"
         ];
@@ -155,18 +163,7 @@ public sealed class DrawLuaBinding : LuaBindingBase
                 field.Value.Assign(request, value);
             }
 
-            foreach (TablePair pair in table.Pairs)
-            {
-                string key = pair.Key.CastToString();
-
-                if (IgnoredFields.Contains(key))
-                    continue;
-
-                if (ReservedFields.ContainsKey(key))
-                    continue;
-
-                request.Data[key] = pair.Value.ToObject();
-            }
+            request.Data = ExtractDataTable(table);
 
             DrawManager.Instance.AddRequest(request);
         });
@@ -191,14 +188,37 @@ public sealed class DrawLuaBinding : LuaBindingBase
         throw new ScriptRuntimeException($"[DrawLuaBinding] Unknown draw request type: {type}");
     }
 
+    private static Dictionary<string, object> ExtractDataTable(Table table)
+    {
+        Dictionary<string, object> data = [];
+
+        foreach (var pair in table.Pairs)
+        {
+            if (pair.Key.Type != DataType.String)
+                continue;
+
+            string key = pair.Key.String;
+
+            if (ReservedFields.ContainsKey(key))
+                continue;
+
+            if (EngineFields.Contains(key))
+                continue;
+
+            data[key] = pair.Value.ToObject();
+        }
+
+        return data;
+    }
+
     private sealed class ReservedField
     {
+        public bool HasDefaultValue { get; init; }
         /// <summary>
-        /// Default value to use when the field is omitted.
-        /// Null means the field is required.
+        /// Default value to use when the Lua field is missing.
+        /// Only used when HasDefaultValue is true.
         /// </summary>
         public object DefaultValue { get; init; }
-        public bool HasDefaultValue { get; init; }
 
         /// <summary>
         /// Converts a Lua value into the desired CLR value.

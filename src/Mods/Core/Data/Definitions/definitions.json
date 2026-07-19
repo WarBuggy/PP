@@ -6,6 +6,11 @@
                     "payload": {
                         "index": 2
                     }
+                },
+                "ui": {
+                    "payload": {
+                        "index": 999
+                    }
                 }
             },
             "gameObject": {
@@ -16,12 +21,16 @@
                     }
                 }
             },
-            "other": {
-                "screenScaling": {
+            "worldViewSetting": {
+                "playableBox": {
                     "payload": {
-                        "shoulderWidth": 0.41,
-                        "minVisibleDimension": 12,
-                        "prioritizeHeight": true
+                        "primaryRatio": 3,
+                        "remainingRatio": 2,
+                        "minPrimary": 900,
+                        "horizontalAlign": "center",
+                        "verticalAlign": "bottom",
+                        "primaryDimension": "height",
+                        "fitToScreen": false
                     }
                 }
             }

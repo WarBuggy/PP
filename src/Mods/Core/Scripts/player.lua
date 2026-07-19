@@ -54,4 +54,4 @@ local function updateAnimationPlayer(deltaTime, totalTime)
     end
 end
 
-Events.OnUpdate.Add(updateAnimationPlayer)
+-- Events.OnUpdate.Add(updateAnimationPlayer)

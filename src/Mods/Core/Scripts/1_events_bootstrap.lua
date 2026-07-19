@@ -10,6 +10,18 @@ Events.OnAnimationCreated = {
     end
 }
 
+Events.OnGameEngineReady = {
+    Add = function(fn)
+        Events.Register("OnGameEngineReady", fn)
+    end
+}
+
+Events.OnUpdate = {
+    Add = function(fn) 
+        Events.Register("OnUpdate", fn) 
+    end
+}
+
 Events.OnDraw = {
     Add = function(fn) 
         Events.Register("OnDraw", fn) 

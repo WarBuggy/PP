@@ -30,4 +30,4 @@ local function drawTestBox(deltaTime, totalTime)
     DrawQueue.AddToQueue(request)
 end
 
-Events.OnUpdate.Add(drawTestBox)
+-- Events.OnUpdate.Add(drawTestBox)
