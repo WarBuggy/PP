@@ -1,4 +1,4 @@
-local function getPlayableBoxSetting()
+local function loadSetting()
     local targetDefType = "worldViewSetting"
     local defName = "playableBox"
 
@@ -45,7 +45,7 @@ local function getPlayableBoxSetting()
     }
 end
 
-local function calculatePlayableBox(screenWidth, screenHeight, setting)
+local function calculateDimension(screenWidth, screenHeight, setting)
     local screenPrimary
     local screenRemaining
 
@@ -73,23 +73,21 @@ local function calculatePlayableBox(screenWidth, screenHeight, setting)
 
     -- Map back once
 
-    local playableBoxWidth
-    local playableBoxHeight
+    local width
+    local height
 
     if setting.primaryDimension == "height" then
-        playableBoxHeight = primary
-        playableBoxWidth = remaining
+        height = primary
+        width = remaining
     else
-        playableBoxWidth = primary
-        playableBoxHeight = remaining
+        width = primary
+        height = remaining
     end
 
-    return playableBoxWidth, playableBoxHeight
+    return width, height
 end
 
-local function calculatePlayableBoxCorners(
-    screenWidth, screenHeight, setting, 
-    playableBoxWidth, playableBoxHeight)
+local function calculateBounds(screenWidth, screenHeight, setting, width, height)
 
     local left
     local top
@@ -100,10 +98,10 @@ local function calculatePlayableBoxCorners(
         left = 0
 
     elseif setting.horizontalAlign == "center" then
-        left = (screenWidth - playableBoxWidth) / 2
+        left = (screenWidth - width) / 2
 
     elseif setting.horizontalAlign == "right" then
-        left = screenWidth - playableBoxWidth
+        left = screenWidth - width
 
     else
         error(Localize(
@@ -118,10 +116,10 @@ local function calculatePlayableBoxCorners(
         top = 0
 
     elseif setting.verticalAlign == "center" then
-        top = (screenHeight - playableBoxHeight) / 2
+        top = (screenHeight - height) / 2
 
     elseif setting.verticalAlign == "bottom" then
-        top = screenHeight - playableBoxHeight
+        top = screenHeight - height
 
     else
         error(Localize(
@@ -130,16 +128,16 @@ local function calculatePlayableBoxCorners(
         ))
     end
 
-    local right = left + playableBoxWidth
-    local bottom = top + playableBoxHeight
+    local right = left + width
+    local bottom = top + height
 
     return {
         left = left,
         top = top,
         right = right,
         bottom = bottom,
-        width = playableBoxWidth,
-        height = playableBoxHeight
+        width = width,
+        height = height
     }
 end
 
@@ -148,7 +146,7 @@ local cachedBounds = nil
 local cachedLines = nil
 local cachedDrawRequests = nil
 
-local function createCachedDrawRequests()
+local function buildDrawRequests()
 
     cachedDrawRequests = {}
 
@@ -176,19 +174,19 @@ local function createCachedDrawRequests()
     end
 end
 
-local function initializePlayableBox()
+local function init()
 
-    cachedSetting = getPlayableBoxSetting()
+    cachedSetting = loadSetting()
 
     local screenWidth = Screen.Width()
     local screenHeight = Screen.Height()
 
-    local playableBoxWidth, playableBoxHeight = calculatePlayableBox(
+    local width, height = calculateDimension(
             screenWidth, screenHeight, cachedSetting)
 
 
-    cachedBounds = calculatePlayableBoxCorners(
-            screenWidth, screenHeight, cachedSetting, playableBoxWidth, playableBoxHeight)
+    cachedBounds = calculateBounds(
+            screenWidth, screenHeight, cachedSetting, width, height)
 
 
     cachedLines =
@@ -223,10 +221,10 @@ local function initializePlayableBox()
     }
 
 
-    createCachedDrawRequests()
+    buildDrawRequests()
 end
 
-local function drawPlayableBox(deltaTime, totalTime)
+local function draw(deltaTime, totalTime)
 
     if not cachedDrawRequests then
         return
@@ -237,7 +235,25 @@ local function drawPlayableBox(deltaTime, totalTime)
     end
 end
 
-Events.OnUpdate.Add(drawPlayableBox)
+local function getBounds()
+
+    if not cachedBounds then
+        error(Localize("playableBox.lua.notInitialized"))
+    end
+
+    return {
+        left = cachedBounds.left,
+        top = cachedBounds.top,
+        right = cachedBounds.right,
+        bottom = cachedBounds.bottom,
+
+        width = cachedBounds.width,
+        height = cachedBounds.height
+    }
+end
+
+Events.OnUpdate.Add(draw)
 
 PlayableBox = PlayableBox or {}
-PlayableBox.InitializePlayableBox = initializePlayableBox
+PlayableBox.Init = init
+PlayableBox.GetBounds = getBounds

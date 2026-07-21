@@ -17,7 +17,7 @@ public class EngineManager : Game
 {
     private static readonly EngineManager _instance = new();
     public static EngineManager Instance => _instance;
-    private readonly GraphicsDeviceManager _graphics;
+    private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private const float FrameDuration = 0.12f;
     private LedgerArray _drawRequestList = null!;
@@ -26,7 +26,11 @@ public class EngineManager : Game
 
     private EngineManager()
     {
-        _graphics = new GraphicsDeviceManager(this);
+        _graphics = new GraphicsDeviceManager(this)
+        {
+            PreferredBackBufferWidth = 1440,
+            PreferredBackBufferHeight = 1080,
+        };
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }

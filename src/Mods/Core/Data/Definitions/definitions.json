@@ -2,7 +2,7 @@
     "data": {
         "definition": {
             "drawLayer": {
-                "mcHeight": {
+                "pc": {
                     "payload": {
                         "index": 2
                     }
@@ -31,6 +31,17 @@
                         "verticalAlign": "bottom",
                         "primaryDimension": "height",
                         "fitToScreen": false
+                    }
+                },
+                "horizon": {
+                    "payload": {
+                        "distance": 40,
+                        "playableBoxOffsetRatio": 0.7
+                    }
+                },
+                "perspective": {
+                    "payload": {
+                        "d0": 30
                     }
                 }
             }

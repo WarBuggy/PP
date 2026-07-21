@@ -40,7 +40,8 @@
                 "playableBox.lua.missingSettingParam": "World view setting '{0}/{1}' is missing one or more required payload fields",
                 "playableBox.lua.invalidPrimaryDimension": "Invalid primaryDimension '{0}'. Expected 'width' or 'height'",
                 "playableBox.lua.invalidHorizontalAlign": "Invalid horizontalAlign '{0}'. Expected 'left', 'center', or 'right'",
-                "playableBox.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'"
+                "playableBox.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'",
+                "playableBox.lua.notInitialized": "Playable box has not been initialized"
             }
         }
     }

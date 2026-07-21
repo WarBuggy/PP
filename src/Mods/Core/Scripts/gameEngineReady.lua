@@ -1,5 +1,6 @@
 local function onGameEngineReady()
-    PlayableBox.InitializePlayableBox()
+    PlayableBox.Init()
+    Player.Init()
 end
 
 Events.OnGameEngineReady.Add(onGameEngineReady)

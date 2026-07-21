@@ -4,54 +4,55 @@ local FRAME_DURATION = 0.12
 -- Store accumulated time for the player animation
 local frameTimer = 0
 
-local function updateAnimationPlayer(deltaTime, totalTime)
+local pcPosition = nil
 
-    local activeActionList, exists = GameData.TryGet("actions.activeList", "Core")
-    if not exists or not activeActionList then return end
+local function updateAnimation(deltaTime, totalTime)
 
-    local animationName = "player"
-    local baseCompName, _ = Animation.TryGetBaseComponent(animationName)
+    local bounds = PlayableBox.GetBounds()
 
-    -- Determine new state
-    local compBaseNewState, _ = Animation.TryGetCompProperty(animationName, baseCompName, "defaultState")
-    local flipX = false
-    if LedgerMap.TryGet(activeActionList, "moveLeft") then
-        compBaseNewState = "moving"
-        flipX = true
-    elseif LedgerMap.TryGet(activeActionList, "moveRight") then
-        compBaseNewState = "moving"
+    if not bounds then
+        return
     end
 
-    local compBasePrevState = Animation.TryGetCompProperty(animationName, baseCompName, "currentState")
+    local boxWidth = 100
+    local boxHeight = 130
 
-    -- Handle state change
-    if compBaseNewState ~= compBasePrevState then
-        Animation.SetCurrentState(animationName, baseCompName, compBaseNewState)
-        Animation.SetCurrentFrame(animationName, baseCompName, compBaseNewState, 1)
-        frameTimer = 0  -- reset timer on state change
-    else
-        -- Advance frame based on timer
-        frameTimer = frameTimer + deltaTime
-        if frameTimer >= FRAME_DURATION then
-            frameTimer = frameTimer - FRAME_DURATION
-            AnimationUtils.GoToNextFrame(animationName, baseCompName, compBaseNewState)
-        end
-    end
+    -- Bottom center of playable box
+    local x = (bounds.left + bounds.right - boxWidth) * 0.5
+    local y = bounds.bottom - boxHeight
 
-    local frameIndex, frameKey, frameExists = Animation.TryGetCurrentFrameInfo(animationName, baseCompName, compBaseNewState)
+    local request = BasicShape.CreateRectDrawRequest(
+    {
+        x = x,
+        y = y,
 
-    -- Update flipX
-    Animation.SetFrameProperty(animationName, baseCompName, compBaseNewState, frameKey, "flipX", flipX)
-    
-    -- Center and position
-    AnimationUtils.CenterFrameOnScreen(animationName, baseCompName, compBaseNewState, frameKey)
-    AnimationUtils.PositionAnimationComponents(animationName)
+        width = boxWidth,
+        height = boxHeight,
 
-    local drawRequestLedger, exists = GameData.TryGet("drawRequest.list", "Core")
-    if exists and drawRequestLedger then
-        local requests = Animation.CreateDrawRequests("Core", animationName)
-        DrawQueue.AddListToQueue(requests)
-    end
+        r = 255,
+        g = 0,
+        b = 255,
+
+        layer = "mcHeight",
+    })
+
+    DrawQueue.AddToQueue(request)
 end
 
--- Events.OnUpdate.Add(updateAnimationPlayer)
+Events.OnUpdate.Add(updateAnimation)
+
+
+local function calculatePcPosition(playableBoxBounds)
+    return {
+        x = (playableBoxBounds.left + playableBoxBounds.right) * 0.5,
+        y = playableBoxBounds.bottom
+    }
+end
+
+local function init()
+    local playableBoxBounds = PlayableBox.GetBounds()
+    calculatePcPosition(playableBoxBounds)
+end 
+
+Player = Player or {}
+Player.Init = init
