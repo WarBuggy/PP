@@ -1,0 +1,18 @@
+{
+    "data": {
+        "definition": {
+            "sprite": {
+                "smallCircle": {
+                    "payload": {
+                        "folder": "misc/",
+                        "file": "circle_small.png",
+                        "pivotX": 8,
+                        "pivotY": 8,
+                        "width": 17,
+                        "height": 17
+                    }
+                }
+            }
+        }
+    }
+}

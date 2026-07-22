@@ -37,6 +37,28 @@ local function updateAnimation(deltaTime, totalTime)
     })
 
     DrawQueue.AddToQueue(request)
+
+    local spriteRequest, ok = Sprite.CreateDrawRequest(
+        {
+            defName = "smallCircle",
+
+            x = 100,
+            y = 300,
+
+            layer = "ui",
+
+            scaleX = 1,
+            scaleY = 1,
+
+            r = 255,
+            g = 255,
+            b = 0,
+            a = 255,
+        })
+
+    if ok then
+        DrawQueue.AddToQueue(spriteRequest)
+    end
 end
 
 Events.OnUpdate.Add(updateAnimation)
