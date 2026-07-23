@@ -2,6 +2,11 @@
     "data": {
         "definition": {
             "drawLayer": {
+                "background": {
+                    "payload": {
+                        "index": 0.1
+                    }
+                },
                 "pc": {
                     "payload": {
                         "index": 2
@@ -13,35 +18,21 @@
                     }
                 }
             },
-            "gameObject": {
-                "mc": {
-                    "payload": {
-                        "animation": "mc",
-                        "animationModId": "Core"
-                    }
-                }
-            },
             "worldViewSetting": {
                 "playableBox": {
                     "payload": {
-                        "primaryRatio": 3,
-                        "remainingRatio": 2,
-                        "minPrimary": 900,
+                        "widthRatio": 1,
+                        "heightRatio": 1,
+                        "maxWidth": 900,
+                        "maxHeight": 900,
                         "horizontalAlign": "center",
-                        "verticalAlign": "bottom",
-                        "primaryDimension": "height",
-                        "fitToScreen": false
+                        "verticalAlign": "center"
                     }
                 },
-                "horizon": {
+                "backgroundImage": {
                     "payload": {
-                        "distance": 40,
-                        "playableBoxOffsetRatio": 0.7
-                    }
-                },
-                "perspective": {
-                    "payload": {
-                        "d0": 30
+                        "playableCutoutWidth": 900,
+                        "playableCutoutHeight": 900
                     }
                 }
             }

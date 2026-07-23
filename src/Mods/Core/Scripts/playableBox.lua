@@ -1,87 +1,70 @@
 local function loadSetting()
     local targetDefType = "worldViewSetting"
-    local defName = "playableBox"
+    local playableBoxDefName = "playableBox"
+    local bgDefName = "backgroundImage"
 
-    local primaryRatio, existsPrimaryRatio =
-        Definition.TryGetPayload(targetDefType, defName, {"primaryRatio"})
+    local widthRatio, existsWidthRatio =
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"widthRatio"})
 
-    local remainingRatio, existsRemainingRatio =
-        Definition.TryGetPayload(targetDefType, defName, {"remainingRatio"})
+    local heightRatio, existsHeightRatio =
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"heightRatio"})
 
-    local minPrimary, existsMinPrimary =
-        Definition.TryGetPayload(targetDefType, defName, {"minPrimary"})
+    local maxWidth, existsMaxWidth =
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"maxWidth"})
 
-    local primaryDimension, existsPrimaryDimension =
-        Definition.TryGetPayload(targetDefType, defName, {"primaryDimension"})
+    local maxHeight, existsMaxHeight =
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"maxHeight"})
 
     local horizontalAlign, existsHorizontalAlign =
-        Definition.TryGetPayload(targetDefType, defName, {"horizontalAlign"})
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"horizontalAlign"})
 
     local verticalAlign, existsVerticalAlign =
-        Definition.TryGetPayload(targetDefType, defName, {"verticalAlign"})
+        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"verticalAlign"})
+    
+    local playableCutoutWidth, existsPlayableCutoutWidth =
+        Definition.TryGetPayload(targetDefType, bgDefName, {"playableCutoutWidth"})
 
-    local fitToScreen, existsFitToScreen =
-        Definition.TryGetPayload(targetDefType, defName, {"fitToScreen"})
+    local playableCutoutHeight, existsPlayableCutoutHeight =
+        Definition.TryGetPayload(targetDefType, bgDefName, {"playableCutoutHeight"})
 
-    if not existsPrimaryRatio
-        or not existsRemainingRatio
-        or not existsMinPrimary
-        or not existsPrimaryDimension
+    if not existsWidthRatio
+        or not existsHeightRatio
+        or not existsMaxWidth
+        or not existsMaxHeight
         or not existsHorizontalAlign
-        or not existsVerticalAlign
-        or not existsFitToScreen then
+        or not existsVerticalAlign then
+        error(Localize("playableBox.lua.missingSettingParam", targetDefType, playableBoxDefName))
+    end
 
-        error(Localize("playableBox.lua.missingSettingParam", targetDefType, defName))
+    if not existsPlayableCutoutWidth
+        or not existsPlayableCutoutHeight then
+        error(Localize("playableBox.lua.missingSettingParam", targetDefType, bgDefName))
     end
 
     return {
-        primaryRatio = primaryRatio,
-        remainingRatio = remainingRatio,
-        minPrimary = minPrimary,
-        primaryDimension = primaryDimension,
+        widthRatio = widthRatio,
+        heightRatio = heightRatio,
+        maxWidth = maxWidth,
+        maxHeight = maxHeight,
         horizontalAlign = horizontalAlign,
         verticalAlign = verticalAlign,
-        fitToScreen = fitToScreen
+        playableCutoutWidth = playableCutoutWidth,
+        playableCutoutHeight = playableCutoutHeight
     }
 end
 
 local function calculateDimension(screenWidth, screenHeight, setting)
-    local screenPrimary
-    local screenRemaining
-
-    if setting.primaryDimension == "height" then
-        screenPrimary = screenHeight
-        screenRemaining = screenWidth
-    elseif setting.primaryDimension == "width" then
-        screenPrimary = screenWidth
-        screenRemaining = screenHeight
-    else
-        error(Localize("playableBox.lua.invalidPrimaryDimension", 
-            tostring(setting.primaryDimension)))
-    end
-
-    -- Generic algorithm from here on
-    local ratio = setting.remainingRatio / setting.primaryRatio
-    local minRemaining = setting.minPrimary * ratio
-    local primary = math.max(screenPrimary, setting.minPrimary)
-    local remaining = primary * ratio
-
-    if remaining < minRemaining then
-        remaining = minRemaining
-        primary = remaining / ratio
-    end
-
-    -- Map back once
-
     local width
     local height
 
-    if setting.primaryDimension == "height" then
-        height = primary
-        width = remaining
+    if screenWidth > screenHeight then
+        -- Landscape: height determines the size
+        height = math.min(screenHeight, setting.maxHeight)
+        width = height * setting.widthRatio / setting.heightRatio
     else
-        width = primary
-        height = remaining
+        -- Portrait or square: width determines the size
+        width = math.min(screenWidth, setting.maxWidth)
+        height = width * setting.heightRatio / setting.widthRatio
     end
 
     return width, height
@@ -145,6 +128,7 @@ local cachedSetting = nil
 local cachedBounds = nil
 local cachedLines = nil
 local cachedDrawRequests = nil
+local cachedBackgroundDrawRequest = nil
 
 local function buildDrawRequests()
 
@@ -174,6 +158,36 @@ local function buildDrawRequests()
     end
 end
 
+local function calculateBackgroundScale(playableWidth, playableHeight, setting)
+
+    local scaleX = playableWidth / setting.playableCutoutWidth
+    local scaleY = playableHeight / setting.playableCutoutHeight
+
+    return scaleX, scaleY
+end
+
+local function buildBackgroundDrawRequest(screenWidth, screenHeight, bounds, setting)
+
+    local scaleX, scaleY = calculateBackgroundScale(
+        bounds.width, bounds.height, setting)
+
+    cachedBackgroundDrawRequest = Sprite.CreateDrawRequest(
+    {
+        defName = "background",
+
+        x = screenWidth / 2,
+        y = screenHeight / 2,
+
+        scaleX = scaleX,
+        scaleY = scaleY,
+
+        pivotX = 1050,
+        pivotY = 1050,
+
+        layer = "background"
+    })
+end
+
 local function init()
 
     cachedSetting = loadSetting()
@@ -187,7 +201,6 @@ local function init()
 
     cachedBounds = calculateBounds(
             screenWidth, screenHeight, cachedSetting, width, height)
-
 
     cachedLines =
     {
@@ -222,6 +235,9 @@ local function init()
 
 
     buildDrawRequests()
+
+    buildBackgroundDrawRequest(
+            screenWidth, screenHeight, cachedBounds, cachedSetting)
 end
 
 local function draw(deltaTime, totalTime)
@@ -232,6 +248,10 @@ local function draw(deltaTime, totalTime)
 
     for _, request in ipairs(cachedDrawRequests) do
         DrawQueue.AddToQueue(request)
+    end
+
+     if cachedBackgroundDrawRequest then
+        DrawQueue.AddToQueue(cachedBackgroundDrawRequest)
     end
 end
 
