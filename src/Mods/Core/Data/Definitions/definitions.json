@@ -7,7 +7,7 @@
                         "index": 0.1
                     }
                 },
-                "pc": {
+                "ground": {
                     "payload": {
                         "index": 2
                     }
@@ -33,6 +33,14 @@
                     "payload": {
                         "playableCutoutWidth": 900,
                         "playableCutoutHeight": 900
+                    }
+                },
+                "base": {
+                    "payload": {
+                        "playableBoxCenterXRatio": 0.5,
+                        "playableBoxCenterYRatio": 0.5,
+                        "playableBoxWidthRatio": 0.1,
+                        "playableBoxHeightRatio": 0.1
                     }
                 }
             }

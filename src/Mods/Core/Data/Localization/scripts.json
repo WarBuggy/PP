@@ -42,7 +42,7 @@
                 "basicShape.lua.requestMustBeTable": "BasicShape.CreateRectDrawRequest expects a table",
                 "basicShape.lua.rectSizeRequired": "BasicShape.CreateRectDrawRequest requires width and height",
                 "basicShape.lua.lineEndPointRequired": "Line draw request requires both endX and endY",
-                "playableBox.lua.missingSettingParam": "World view setting '{0}/{1}' is missing one or more required payload fields",
+                "definitionHelper.lua.missingSetting": "Missing required setting '{0}' in definition type '{1}', definition '{2}'",
                 "playableBox.lua.invalidPrimaryDimension": "Invalid primaryDimension '{0}'. Expected 'width' or 'height'",
                 "playableBox.lua.invalidHorizontalAlign": "Invalid horizontalAlign '{0}'. Expected 'left', 'center', or 'right'",
                 "playableBox.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'",

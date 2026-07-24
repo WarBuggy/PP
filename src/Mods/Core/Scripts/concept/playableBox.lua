@@ -1,56 +1,32 @@
 local function loadSetting()
-    local targetDefType = "worldViewSetting"
-    local playableBoxDefName = "playableBox"
-    local bgDefName = "backgroundImage"
+    return DefinitionHelper.LoadSetting(
+    {
+        {
+            targetDefType = "worldViewSetting",
+            defName = "playableBox",
 
-    local widthRatio, existsWidthRatio =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"widthRatio"})
+            params =
+            {
+                widthRatio = {},
+                heightRatio = {},
+                maxWidth = {},
+                maxHeight = {},
+                horizontalAlign = {},
+                verticalAlign = {}
+            }
+        },
 
-    local heightRatio, existsHeightRatio =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"heightRatio"})
+        {
+            targetDefType = "worldViewSetting",
+            defName = "backgroundImage",
 
-    local maxWidth, existsMaxWidth =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"maxWidth"})
-
-    local maxHeight, existsMaxHeight =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"maxHeight"})
-
-    local horizontalAlign, existsHorizontalAlign =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"horizontalAlign"})
-
-    local verticalAlign, existsVerticalAlign =
-        Definition.TryGetPayload(targetDefType, playableBoxDefName, {"verticalAlign"})
-    
-    local playableCutoutWidth, existsPlayableCutoutWidth =
-        Definition.TryGetPayload(targetDefType, bgDefName, {"playableCutoutWidth"})
-
-    local playableCutoutHeight, existsPlayableCutoutHeight =
-        Definition.TryGetPayload(targetDefType, bgDefName, {"playableCutoutHeight"})
-
-    if not existsWidthRatio
-        or not existsHeightRatio
-        or not existsMaxWidth
-        or not existsMaxHeight
-        or not existsHorizontalAlign
-        or not existsVerticalAlign then
-        error(Localize("playableBox.lua.missingSettingParam", targetDefType, playableBoxDefName))
-    end
-
-    if not existsPlayableCutoutWidth
-        or not existsPlayableCutoutHeight then
-        error(Localize("playableBox.lua.missingSettingParam", targetDefType, bgDefName))
-    end
-
-    return {
-        widthRatio = widthRatio,
-        heightRatio = heightRatio,
-        maxWidth = maxWidth,
-        maxHeight = maxHeight,
-        horizontalAlign = horizontalAlign,
-        verticalAlign = verticalAlign,
-        playableCutoutWidth = playableCutoutWidth,
-        playableCutoutHeight = playableCutoutHeight
-    }
+            params =
+            {
+                playableCutoutWidth = {},
+                playableCutoutHeight = {}
+            }
+        }
+    })
 end
 
 local function calculateDimension(screenWidth, screenHeight, setting)
