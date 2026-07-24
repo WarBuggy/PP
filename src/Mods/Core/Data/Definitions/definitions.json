@@ -19,7 +19,7 @@
                 }
             },
             "worldViewSetting": {
-                "playableBox": {
+                "world": {
                     "payload": {
                         "widthRatio": 1,
                         "heightRatio": 1,
@@ -31,16 +31,16 @@
                 },
                 "backgroundImage": {
                     "payload": {
-                        "playableCutoutWidth": 900,
-                        "playableCutoutHeight": 900
+                        "worldCutoutWidth": 900,
+                        "worldCutoutHeight": 900
                     }
                 },
                 "base": {
                     "payload": {
-                        "playableBoxCenterXRatio": 0.5,
-                        "playableBoxCenterYRatio": 0.5,
-                        "playableBoxWidthRatio": 0.1,
-                        "playableBoxHeightRatio": 0.1
+                        "worldXRatio": 0.5,
+                        "worldYRatio": 0.5,
+                        "worldWidthRatio": 0.1,
+                        "worldHeightRatio": 0.1
                     }
                 }
             }

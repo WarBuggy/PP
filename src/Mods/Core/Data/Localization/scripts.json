@@ -42,11 +42,13 @@
                 "basicShape.lua.requestMustBeTable": "BasicShape.CreateRectDrawRequest expects a table",
                 "basicShape.lua.rectSizeRequired": "BasicShape.CreateRectDrawRequest requires width and height",
                 "basicShape.lua.lineEndPointRequired": "Line draw request requires both endX and endY",
-                "definitionHelper.lua.missingSetting": "Missing required setting '{0}' in definition type '{1}', definition '{2}'",
-                "playableBox.lua.invalidPrimaryDimension": "Invalid primaryDimension '{0}'. Expected 'width' or 'height'",
-                "playableBox.lua.invalidHorizontalAlign": "Invalid horizontalAlign '{0}'. Expected 'left', 'center', or 'right'",
-                "playableBox.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'",
-                "playableBox.lua.notInitialized": "Playable box has not been initialized"
+                "definitionHelper.lua.missingSettingParam": "Missing required setting '{0}' in definition type '{1}', definition '{2}'",
+                "world.lua.invalidPrimaryDimension": "Invalid primaryDimension '{0}'. Expected 'width' or 'height'",
+                "world.lua.invalidHorizontalAlign": "Invalid horizontalAlign '{0}'. Expected 'left', 'center', or 'right'",
+                "world.lua.invalidVerticalAlign": "Invalid verticalAlign '{0}'. Expected 'top', 'center', or 'bottom'",
+                "world.lua.notInitialized": "World has not been initialized",
+                "world.lua.originNotInitialized": "World origin has not been initialized",
+                "base.lua.notInitialized": "Base has not been initialized"
             }
         }
     }

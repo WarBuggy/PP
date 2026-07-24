@@ -1,5 +1,5 @@
-local cachedSetting = nil
-local cachedBounds = nil
+local cachedScreenCenterX = nil
+local cachedScreenCenterY = nil
 local cachedDrawRequest = nil
 
 local function loadSetting()
@@ -10,44 +10,49 @@ local function loadSetting()
             defName = "base",
             params =
             {
-                playableBoxCenterXRatio = {},
-                playableBoxCenterYRatio = {},
-                playableBoxWidthRatio = {},
-                playableBoxHeightRatio = {},
+                worldXRatio = {},
+                worldYRatio = {},
+                worldWidthRatio = {},
+                worldHeightRatio = {},
             }
         }
     })
 end
 
-local function calculateBounds(playableBoxBounds, setting)
+local function calculateScreenBounds(worldBounds, setting)
 
     local width =
-        playableBoxBounds.width * setting.playableBoxWidthRatio
+        worldBounds.width * setting.worldWidthRatio
 
     local height =
-        playableBoxBounds.height * setting.playableBoxHeightRatio
+        worldBounds.height * setting.worldHeightRatio
 
-    local centerX = playableBoxBounds.left +
-        playableBoxBounds.width * setting.playableBoxCenterXRatio
+    local centerX =
+        worldBounds.left +
+        worldBounds.width * setting.worldXRatio
 
-    local centerY = playableBoxBounds.top +
-        playableBoxBounds.height * setting.playableBoxCenterYRatio
+    local centerY =
+        worldBounds.top +
+        worldBounds.height * setting.worldYRatio
 
-    local left = centerX - width * 0.5
-    local top = centerY - height * 0.5
+    local left = centerX - width / 2
+    local top = centerY - height / 2
+
+    local right = left + width
+    local bottom = top + height
 
     return
     {
         left = left,
         top = top,
-        right = left + width,
-        bottom = top + height,
+        right = right,
+        bottom = bottom,
 
         centerX = centerX,
         centerY = centerY,
 
         width = width,
-        height = height
+        height = height,
     }
 end
 
@@ -72,22 +77,40 @@ end
 
 local function init()
 
-    cachedSetting = loadSetting()
+    local setting = loadSetting()
 
-    local playableBoxBounds = PlayableBox.GetBounds()
+    local worldScreenBounds = World.GetScreenBounds()
 
-    cachedBounds = calculateBounds(playableBoxBounds, cachedSetting)
+    local screenBounds = calculateScreenBounds(worldScreenBounds, setting)
 
-    cachedDrawRequest = buildDrawRequest(cachedBounds)
+    cachedScreenCenterX = screenBounds.centerX
+    cachedScreenCenterY = screenBounds.centerY
+
+    cachedDrawRequest = buildDrawRequest(screenBounds)
 end
 
 local function draw(deltaTime, totalTime)
+
     if cachedDrawRequest then
         DrawQueue.AddToQueue(cachedDrawRequest)
     end
+end
+
+local function getScreenCenter()
+
+    if not cachedScreenCenterX or not cachedScreenCenterY then
+        error(Localize("base.lua.notInitialized"))
+    end
+
+    return
+    {
+        x = cachedScreenCenterX,
+        y = cachedScreenCenterY,
+    }
 end
 
 Events.OnUpdate.Add(draw)
 
 Base = Base or {}
 Base.Init = init
+Base.GetScreenCenter = getScreenCenter
