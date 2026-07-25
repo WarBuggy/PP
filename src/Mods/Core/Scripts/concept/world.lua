@@ -1,10 +1,12 @@
 local cachedScreenBounds = nil
 local cachedDrawRequests = nil
 local cachedBackgroundDrawRequest = nil
+local pixelPerMeter = nil
+local cachedWorldSize = nil
 local cachedOriginX = nil
 local cachedOriginY = nil
 
-local function loadSetting()
+local function loadSetting(input)
     return DefinitionHelper.LoadSetting(
     {
         {
@@ -18,7 +20,10 @@ local function loadSetting()
                 maxWidth = {},
                 maxHeight = {},
                 horizontalAlign = {},
-                verticalAlign = {}
+                verticalAlign = {},
+                longerDimensionInMeters = {},
+                widthRatioOriginX = {},
+                heightRatioOriginY = {}
             }
         },
 
@@ -35,7 +40,11 @@ local function loadSetting()
     })
 end
 
-local function calculateSize(screenWidth, screenHeight, setting)
+local function calculateScreenSize(input)
+    local screenWidth = input.screenWidth
+    local screenHeight = input.screenHeight
+    local setting = input.setting
+
     local width
     local height
 
@@ -49,11 +58,17 @@ local function calculateSize(screenWidth, screenHeight, setting)
         height = width * setting.heightRatio / setting.widthRatio
     end
 
-    return width, height
+    return {
+        width = width, 
+        height = height,
+    }
 end
 
-local function calculateScreenBounds(screenWidth, screenHeight, setting,
-    screenWorldWidth, screenWorldHeight)
+local function calculateScreenBounds(input)
+
+    local screen = input.screen
+    local setting = input.setting
+    local world = input.world
 
     local left
     local top
@@ -64,14 +79,13 @@ local function calculateScreenBounds(screenWidth, screenHeight, setting,
         left = 0
 
     elseif setting.horizontalAlign == "center" then
-        left = (screenWidth - screenWorldWidth) / 2
+        left = (screen.width - world.screenWidth) / 2
 
     elseif setting.horizontalAlign == "right" then
-        left = screenWidth - screenWorldWidth
+        left = screen.width - world.screenWidth
 
     else
-        error(Localize(
-            "world.lua.invalidHorizontalAlign",
+        error(Localize("world.lua.invalidHorizontalAlign",
             tostring(setting.horizontalAlign)
         ))
     end
@@ -82,34 +96,32 @@ local function calculateScreenBounds(screenWidth, screenHeight, setting,
         top = 0
 
     elseif setting.verticalAlign == "center" then
-        top = (screenHeight - screenWorldHeight) / 2
+        top = (screen.height - world.screenHeight) / 2
 
     elseif setting.verticalAlign == "bottom" then
-        top = screenHeight - screenWorldHeight
+        top = screen.height - world.screenHeight
 
     else
-        error(Localize(
-            "world.lua.invalidVerticalAlign",
+        error(Localize("world.lua.invalidVerticalAlign",
             tostring(setting.verticalAlign)
         ))
     end
-
-    local right = left + screenWorldWidth
-    local bottom = top + screenWorldHeight
 
     return
     {
         left = left,
         top = top,
-        right = right,
-        bottom = bottom,
+        right = left + world.screenWidth,
+        bottom = top + world.screenHeight,
 
-        width = screenWorldWidth,
-        height = screenWorldHeight,
+        width = world.screenWidth,
+        height = world.screenHeight,
     }
 end
 
-local function buildDrawRequests(screenBounds)
+local function buildDrawRequests(input)
+
+    local screenBounds = input
 
     cachedDrawRequests =
     {
@@ -187,18 +199,31 @@ local function buildDrawRequests(screenBounds)
     }
 end
 
-local function calculateBackgroundScale(screenBoundsWidth, screenBoundsHeight, setting)
+local function calculateBackgroundScale(input)
 
-    local scaleX = screenBoundsWidth / setting.worldCutoutWidth
-    local scaleY = screenBoundsHeight / setting.worldCutoutHeight
+    local screenBounds = input.screenBounds
+    local setting = input.setting
 
-    return scaleX, scaleY
+    local scaleX = screenBounds.width / setting.worldCutoutWidth
+    local scaleY = screenBounds.height / setting.worldCutoutHeight
+
+    return {
+        scaleX = scaleX,
+        scaleY = scaleY,
+    }
 end
 
-local function buildBackgroundDrawRequest(screenWidth, screenHeight, screenBounds, setting)
+local function buildBackgroundDrawRequest(input)
 
-    local scaleX, scaleY = calculateBackgroundScale(
-        screenBounds.width, screenBounds.height, setting)
+    local screenWidth = input.screenWidth
+    local screenHeight = input.screenHeight
+    local screenBounds = input.screenBounds
+    local setting = input.setting
+
+    local backgroundScale = calculateBackgroundScale({
+        screenBounds = screenBounds,
+        setting = setting,
+    })
 
     cachedBackgroundDrawRequest = Sprite.CreateDrawRequest(
     {
@@ -207,8 +232,8 @@ local function buildBackgroundDrawRequest(screenWidth, screenHeight, screenBound
         x = screenWidth / 2,
         y = screenHeight / 2,
 
-        scaleX = scaleX,
-        scaleY = scaleY,
+        scaleX = backgroundScale.scaleX,
+        scaleY = backgroundScale.scaleY,
 
         pivotX = 1050,
         pivotY = 1050,
@@ -217,23 +242,110 @@ local function buildBackgroundDrawRequest(screenWidth, screenHeight, screenBound
     })
 end
 
-local function init()
+local function calculatePixelsPerMeter(input)
+
+    local screenWidth = input.screenWidth
+    local screenHeight = input.screenHeight
+    local longerDimensionInMeters = input.longerDimensionInMeters
+
+    local longerDimensionPixels = math.max(screenWidth, screenHeight)
+
+    return longerDimensionPixels / longerDimensionInMeters
+end
+
+local function calculateWorldSize(input)
+
+    local worldScreenSize = input.worldScreenSize
+    local setting = input.setting
+
+    local width
+    local height
+
+    if worldScreenSize.width >= worldScreenSize.height then
+        width = setting.longerDimensionInMeters
+        height = width * worldScreenSize.height / worldScreenSize.width
+    else
+        height = setting.longerDimensionInMeters
+        width = height * worldScreenSize.width / worldScreenSize.height
+    end
+
+    return {
+        width = width,
+        height = height,
+    }
+end
+
+local function calculateScreenOrigin(input)
+
+    local screenBounds = input.screenBounds
+    local setting = input.setting
+
+    local originX =
+        screenBounds.left +
+        screenBounds.width * setting.widthRatioOriginX
+
+    local originY =
+        screenBounds.top +
+        screenBounds.height * setting.heightRatioOriginY
+
+    return {
+        originX = originX,
+        originY = originY,
+    }
+end
+
+local function init(input)
 
     local setting = loadSetting()
 
     local screenWidth = Screen.Width()
     local screenHeight = Screen.Height()
 
-    local screenWorldWidth, screenWorldHeight =
-        calculateSize(screenWidth, screenHeight, setting)
+    local worldScreenSize = calculateScreenSize({
+            screenWidth = screenWidth, 
+            screenHeight = screenHeight, 
+            setting = setting
+        })
 
-    cachedScreenBounds = calculateScreenBounds(screenWidth, screenHeight, 
-        setting, screenWorldWidth, screenWorldHeight)
+    cachedScreenBounds = calculateScreenBounds({
+        screen = { 
+            width = screenWidth,
+            height = screenHeight,
+        },
+        setting = setting,
+        world = {
+            screenWidth = worldScreenSize.width,
+            screenHeight = worldScreenSize.height,
+        }
+    })
+
+    cachedWorldSize = calculateWorldSize({
+        worldScreenSize = worldScreenSize,
+        setting = setting,
+    })
+    
+    pixelPerMeter = calculatePixelsPerMeter({
+        screenWidth = worldScreenSize.width, 
+        screenHeight = worldScreenSize.height,
+        longerDimensionInMeters = setting.longerDimensionInMeters, 
+    })
+
+    local origin = calculateScreenOrigin({
+        screenBounds = cachedScreenBounds,
+        setting = setting,
+    })
+
+    cachedOriginX = origin.originX
+    cachedOriginY = origin.originY
 
     buildDrawRequests(cachedScreenBounds)
 
-    buildBackgroundDrawRequest(screenWidth, screenHeight, 
-        cachedScreenBounds, setting)
+    buildBackgroundDrawRequest({
+        screenWidth = screenWidth, 
+        screenHeight = screenHeight, 
+        screenBounds = cachedScreenBounds,
+        setting = setting,
+    })
 end
 
 local function draw(deltaTime, totalTime)
@@ -251,7 +363,9 @@ local function draw(deltaTime, totalTime)
     end
 end
 
-local function getScreenBounds()
+Events.OnUpdate.Add(draw)
+
+local function getScreenBounds(input)
 
     if not cachedScreenBounds then
         error(Localize("world.lua.notInitialized"))
@@ -269,29 +383,40 @@ local function getScreenBounds()
     }
 end
 
-local function setScreenOrigin(screenX, screenY)
-
-    cachedOriginX = screenX
-    cachedOriginY = screenY
+local function getPixelsPerMeter()
+    return pixelPerMeter
 end
 
-local function getScreenOrigin()
+local function worldToScreen(input)
 
-    if not cachedOriginX or not cachedOriginY then
-        error(Localize("world.lua.originNotInitialized"))
-    end
+    local posX = input.posX
+    local posY = input.posY
 
-    return
-    {
-        x = cachedOriginX,
-        y = cachedOriginY,
+    return {
+        x = cachedOriginX + posX * pixelPerMeter,
+        y = cachedOriginY + posY * pixelPerMeter,
     }
 end
 
-Events.OnUpdate.Add(draw)
+local function screenToWorld(input)
+
+    local x = input.x
+    local y = input.y
+
+    return {
+        posX = (x - cachedOriginX) / pixelPerMeter,
+        posY = (y - cachedOriginY) / pixelPerMeter,
+    }
+end
+
+local function meterToPixel(input)
+    return { pixel = input.meter * pixelPerMeter, }
+end
 
 World = World or {}
 World.Init = init
 World.GetScreenBounds = getScreenBounds
-World.SetScreenOrigin = setScreenOrigin
-World.GetScreenOrigin = getScreenOrigin
+World.GetPixelsPerMeter = getPixelsPerMeter
+World.WorldToScreen = worldToScreen
+World.ScreenToWorld = screenToWorld
+World.MeterToPixel = meterToPixel

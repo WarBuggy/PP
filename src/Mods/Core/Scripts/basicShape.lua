@@ -11,84 +11,109 @@ local COMMON_DRAW_PROPERTIES =
     "a"
 }
 
-local function resolveLayerOrder(params)
+local function resolveLayerOrder(input)
 
-    local layerOrder = 0 -- can default to 0 and fail silently
+    local layer = input.layer
 
-    if params.layer ~= nil then
-        local resolvedOrder, exists = DrawLayers.TryGetLayerOrder(params.layer)
+    local layerOrder = 0 -- Can default to 0 and fail silently.
+
+    if layer ~= nil then
+        local resolvedOrder, exists = DrawLayers.TryGetLayerOrder(layer)
 
         if exists then
             layerOrder = resolvedOrder
         end
     end
 
-    return layerOrder
+    return {
+        layerOrder = layerOrder
+    }
 end
 
 
-local function applyCommonRequestProperties(params, request)
+local function applyCommonRequestProperties(input)
+
+    local params = input.params
+    local request = input.request
 
     for _, propertyName in ipairs(COMMON_DRAW_PROPERTIES) do
         if params[propertyName] ~= nil then
             request[propertyName] = params[propertyName]
         end
     end
+
+    return {
+        request = request
+    }
 end
 
-local function createRectDrawRequest(params)
-    
-    if type(params) ~= "table" then
+local function createRectDrawRequest(input)
+
+    if type(input) ~= "table" then
         error(Localize("basicShape.lua.requestMustBeTable"))
     end
 
-    if params.width == nil or params.height == nil then
+    if input.width == nil or input.height == nil then
         error(Localize("basicShape.lua.rectSizeRequired"))
     end
+
+    local layerResult = resolveLayerOrder({
+        layer = input.layer
+    })
 
     local request =
     {
         type = "rectangle",
 
-        x = params.x or 0,
-        y = params.y or 0,
+        x = input.x or 0,
+        y = input.y or 0,
 
-        width = params.width,
-        height = params.height,
+        width = input.width,
+        height = input.height,
 
-        layerOrder = resolveLayerOrder(params),
+        layerOrder = layerResult.layerOrder,
     }
 
-    applyCommonRequestProperties(params, request)
+    local result = applyCommonRequestProperties({
+        params = input,
+        request = request
+    })
 
     return request
 end
 
-local function createLineDrawRequest(params)
+local function createLineDrawRequest(input)
 
-    if type(params) ~= "table" then
+    if type(input) ~= "table" then
         error(Localize("basicShape.lua.requestMustBeTable"))
     end
 
-    if params.endX == nil or params.endY == nil then
+    if input.endX == nil or input.endY == nil then
         error(Localize("basicShape.lua.lineEndPointRequired"))
     end
+
+    local layerResult = resolveLayerOrder({
+        layer = input.layer
+    })
 
     local request =
     {
         type = "line",
 
-        x = params.x or 0,
-        y = params.y or 0,
+        x = input.x or 0,
+        y = input.y or 0,
 
-        layerOrder = resolveLayerOrder(params),
+        layerOrder = layerResult.layerOrder,
 
-        endX = params.endX,
-        endY = params.endY,
-        thickness = params.thickness or 1,
+        endX = input.endX,
+        endY = input.endY,
+        thickness = input.thickness or 1,
     }
 
-    applyCommonRequestProperties(params, request)
+    local result = applyCommonRequestProperties({
+        params = input,
+        request = request
+    })
 
     return request
 end

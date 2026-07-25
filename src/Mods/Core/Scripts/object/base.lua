@@ -1,8 +1,8 @@
-local cachedScreenCenterX = nil
-local cachedScreenCenterY = nil
+local cachedPosX = nil
+local cachedPosY = nil
 local cachedDrawRequest = nil
 
-local function loadSetting()
+local function loadSetting(input)
     return DefinitionHelper.LoadSetting(
     {
         {
@@ -10,107 +10,73 @@ local function loadSetting()
             defName = "base",
             params =
             {
-                worldXRatio = {},
-                worldYRatio = {},
-                worldWidthRatio = {},
-                worldHeightRatio = {},
+                posX = {},
+                posY = {},
+                width = {},
+                height = {},
             }
         }
     })
 end
 
-local function calculateScreenBounds(worldBounds, setting)
+local function getPosition(input)
 
-    local width =
-        worldBounds.width * setting.worldWidthRatio
+    if not cachedPosX or not cachedPosY then
+        error(Localize("base.lua.notInitialized"))
+    end
 
-    local height =
-        worldBounds.height * setting.worldHeightRatio
-
-    local centerX =
-        worldBounds.left +
-        worldBounds.width * setting.worldXRatio
-
-    local centerY =
-        worldBounds.top +
-        worldBounds.height * setting.worldYRatio
-
-    local left = centerX - width / 2
-    local top = centerY - height / 2
-
-    local right = left + width
-    local bottom = top + height
-
-    return
-    {
-        left = left,
-        top = top,
-        right = right,
-        bottom = bottom,
-
-        centerX = centerX,
-        centerY = centerY,
-
-        width = width,
-        height = height,
+    return {
+        posX = cachedPosX,
+        posY = cachedPosY,
     }
 end
 
-local function buildDrawRequest(bounds)
+local function createDrawRequest(input)
 
-    return BasicShape.CreateRectDrawRequest(
+    local setting = input.setting
+    local width = setting.width
+    local height = setting.height
+
+    cachedDrawRequest = WorldRenderer.CreateRectDrawRequest(
     {
-        x = bounds.left,
-        y = bounds.top,
+        posX = setting.posX - width / 2,
+        posY = setting.posY - height / 2,
 
-        width = bounds.width,
-        height = bounds.height,
+        width = width,
+        height = height,
 
         r = 255,
-        g = 0,
-        b = 255,
+        g = 255,
+        b = 0,
         a = 255,
-
-        layer = "ui",
     })
+
 end
 
 local function init()
 
     local setting = loadSetting()
 
-    local worldScreenBounds = World.GetScreenBounds()
+    cachedPosX = setting.posX
+    cachedPosY = setting.posY
 
-    local screenBounds = calculateScreenBounds(worldScreenBounds, setting)
+    createDrawRequest({ setting = setting, })
 
-    cachedScreenCenterX = screenBounds.centerX
-    cachedScreenCenterY = screenBounds.centerY
-
-    cachedDrawRequest = buildDrawRequest(screenBounds)
 end
-
-local function draw(deltaTime, totalTime)
-
-    if cachedDrawRequest then
-        DrawQueue.AddToQueue(cachedDrawRequest)
-    end
-end
-
-local function getScreenCenter()
-
-    if not cachedScreenCenterX or not cachedScreenCenterY then
-        error(Localize("base.lua.notInitialized"))
-    end
-
-    return
-    {
-        x = cachedScreenCenterX,
-        y = cachedScreenCenterY,
-    }
-end
-
-Events.OnUpdate.Add(draw)
 
 Base = Base or {}
 Base.Init = init
-Base.GetScreenCenter = getScreenCenter
+Base.GetPosition = getPosition
+
+
+local function draw(deltaTime, totalTime)
+
+    if not cachedDrawRequest then
+        return
+    end
+
+    DrawQueue.AddToQueue(cachedDrawRequest)
+    
+end
+
+Events.OnUpdate.Add(draw)
