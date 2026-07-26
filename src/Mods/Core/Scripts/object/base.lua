@@ -49,6 +49,8 @@ local function createDrawRequest(input)
         g = 255,
         b = 0,
         a = 255,
+
+        layer = "ground",
     })
 
 end

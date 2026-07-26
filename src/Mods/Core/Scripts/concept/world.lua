@@ -413,6 +413,15 @@ local function meterToPixel(input)
     return { pixel = input.meter * pixelPerMeter, }
 end
 
+local function getSize(input)
+    if not cachedWorldSize then
+        error(Localize("world.lua.notInitialized"))
+    end
+
+    return cachedWorldSize
+end
+
+
 World = World or {}
 World.Init = init
 World.GetScreenBounds = getScreenBounds
@@ -420,3 +429,4 @@ World.GetPixelsPerMeter = getPixelsPerMeter
 World.WorldToScreen = worldToScreen
 World.ScreenToWorld = screenToWorld
 World.MeterToPixel = meterToPixel
+World.GetSize = getSize
