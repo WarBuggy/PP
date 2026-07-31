@@ -18,24 +18,32 @@
                     }
                 }
             },
-            "worldViewSetting": {
-                "world": {
+            "camera": {
+                "viewport": {
                     "payload": {
-                        "widthRatio": 1,
-                        "heightRatio": 1,
-                        "maxWidth": 900,
-                        "maxHeight": 900,
-                        "horizontalAlign": "center",
-                        "verticalAlign": "center",
-                        "longerDimensionInMeters": 100,
-                        "widthRatioOriginX": 0.5,
-                        "heightRatioOriginY": 0.5
+                        "maxScreenWidthRatio": 1,
+                        "maxScreenHeightRatio": 1,
+                        "aspectRatio": "1:1",
+                        "horizontalAlignment": "center",
+                        "verticalAlignment": "center",
+                        "worldPrimaryDimensionInPixel": 900
                     }
                 },
                 "backgroundImage": {
                     "payload": {
                         "worldCutoutWidth": 900,
                         "worldCutoutHeight": 900
+                    }
+                }
+            },
+            "world": {
+                "setting": {
+                    "payload": {
+                        "primaryDimension": "height",
+                        "primaryDimensionInMeters": 100,
+                        "aspectRatio": "1:1",
+                        "widthRatioOriginPosX": 0.5,
+                        "heightRatioOriginPosY": 0.5
                     }
                 },
                 "base": {
@@ -44,6 +52,23 @@
                         "posY": 0,
                         "width": 5,
                         "height": 5
+                    }
+                }
+            },
+            "zoomLevel": {
+                "medium": {
+                    "payload": {
+                        "viewRadius": 35
+                    }
+                },
+                "furthest": {
+                    "payload": {
+                        "multiplier": 1
+                    }
+                },
+                "closest": {
+                    "payload": {
+                        "viewRadiusInMeter": 15
                     }
                 }
             }

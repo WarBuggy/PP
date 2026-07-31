@@ -61,15 +61,15 @@ return {
 - Eliminates positional parameters and multiple return values.
 - Makes functions easier to understand and modify.
 - Reduces the learning curve for modders.
-```
 
-## Coordinate Systems
 
-### Screen Coordinates
+# Coordinate Systems
+
+## Screen Coordinates
 
 Screen coordinates represent a position on the display in **pixels**. The origin `(0, 0)` is located at the top-left corner of the screen. The x-axis increases to the right, and the y-axis increases downward.
 
-### World Position
+## World Position
 
 A world position represents a location within the game world in **meters**. World positions are independent of the screen resolution, camera, and zoom level. They define where objects exist in the game world rather than where they are drawn on the screen.
 
@@ -90,7 +90,7 @@ These names may be prefixed or suffixed to provide additional context while pres
 
 As long as the variable ends with **`X`/`Y`** or **`PosX`/`PosY`**, its coordinate space is immediately clear.
 
-### Examples
+## Examples
 
 ```lua
 -- Screen coordinates (pixels)
@@ -103,3 +103,42 @@ local playerPosY = -8.0
 ```
 
 Using this convention makes the coordinate space immediately clear from the variable name, reducing ambiguity and helping prevent accidental mixing of screen-space and world-space values.
+
+# Aspect Ratio Format
+
+Whenever a property represents an aspect ratio, it **must** be expressed as a string in the following format:
+
+```text
+<width>:<height>
+```
+
+Where:
+
+- **`width`** is a positive integer.
+- **`height`** is a positive integer.
+
+## Valid Examples
+
+```text
+1:1
+4:3
+16:9
+21:9
+32:9
+```
+
+## Invalid Examples
+
+```text
+1: 1
+1 :1
+1 : 1
+3.4:5
+16/9
+16x9
+0:1
+1:0
+-1:1
+```
+
+Using a string representation ensures aspect ratios remain exact while providing a single, consistent format throughout the project. A future `DefinitionHelper.ParseAspectRatio(value)` helper will be responsible for validating and parsing aspect ratio strings.

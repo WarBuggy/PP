@@ -9,6 +9,9 @@
         },
         "drawRequest": {
             "list": null
+        },
+        "zoomLevel": {
+            "list": null
         }
     }
 }
