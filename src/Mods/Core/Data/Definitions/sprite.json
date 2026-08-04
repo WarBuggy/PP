@@ -12,10 +12,10 @@
                         "height": 17
                     }
                 },
-                "background": {
+                "backdrop": {
                     "payload": {
                         "folder": "misc/",
-                        "file": "background.png",
+                        "file": "backdrop.png",
                         "width": 2100,
                         "height": 2100
                     }

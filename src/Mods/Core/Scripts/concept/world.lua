@@ -14,8 +14,8 @@ local function loadSetting(input)
                 primaryDimension = {},
                 primaryDimensionInMeters = {},
                 aspectRatio = {},
-                widthRatioOriginPosX = {},
-                heightRatioOriginPosY = {},
+                widthRatioOriginX = {},
+                heightRatioOriginY = {},
             }
         },
     })
@@ -71,16 +71,14 @@ local function calculateOriginOffset(input)
     local worldWidth = input.worldWidth
     local worldHeight = input.worldHeight
 
-    local originOffsetX =
-        worldWidth * setting.widthRatioOriginPosX
+    local originOffsetX = worldWidth * setting.widthRatioOriginX
 
-    local originOffsetY =
-        worldHeight * setting.heightRatioOriginPosY
+    local originOffsetY = worldHeight * setting.heightRatioOriginY
 
     return
     {
-        originOffsetX = originOffsetX,
-        originOffsetY = originOffsetY,
+        offsetX = originOffsetX,
+        offsetY = originOffsetY,
     }
 
 end
@@ -123,8 +121,8 @@ local function getOriginOffset(input)
 
     return
     {
-        x = _originOffset.originOffsetX,
-        y = _originOffset.originOffsetY,
+        offsetX = _originOffset.offsetX,
+        offsetY = _originOffset.offsetY,
     }
 
 end

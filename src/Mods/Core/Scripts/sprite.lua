@@ -1,7 +1,9 @@
 local SPRITE_REQUEST_REQUIRED = {
-    defName = "string",
-    x = "number",
-    y = "number",
+    spriteName = "string",
+    pX = "number",
+    pY = "number",
+    pWidth = "number",
+    pHeight = "number",
     layer = "string",
 }
 
@@ -14,9 +16,6 @@ local SPRITE_DATA_FIELDS = {
 }
 
 local DRAW_REQUEST_DEFAULTS = {
-    scaleX = 1,
-    scaleY = 1,
-
     rotation = 0,
 
     flipX = false,
@@ -33,7 +32,11 @@ local DRAW_REQUEST_DEFAULTS = {
 
 local targetDefType = "sprite"
 
-local function getSpriteProperty(defName, property, modId)
+local function getSpriteProperty(input)
+
+    local defName = input.defName
+    local property = input.property
+    local modId = input.modId
 
     local value, exists = Definition.TryGetPayload(
         targetDefType, defName, { property }, modId)
@@ -43,22 +46,36 @@ local function getSpriteProperty(defName, property, modId)
             modId, defName, property))
     end
 
-    return value
+    return {
+        value = value,
+    }
 end
 
-local function getSpriteData(defName, modId)
+local function getSpriteData(input)
+
+    local defName = input.defName
+    local modId = input.modId
 
     local sprite = {}
 
     for _, field in ipairs(SPRITE_DATA_FIELDS) do
-        sprite[field] = getSpriteProperty(
-            defName, field, modId)
+        sprite[field] = getSpriteProperty({
+            defName = defName,
+            property = field,
+            modId = modId,
+        }).value
+            
     end
 
-    return sprite
+    return {
+        sprite = sprite,
+    }
 end
 
-local function validateRequestFields(request, requiredFields)
+local function validateRequestFields(input)
+
+    local request = input.request
+    local requiredFields = input.requiredFields
 
     local values = {}
     local missing = {}
@@ -87,14 +104,23 @@ local function validateRequestFields(request, requiredFields)
     end
 
     if #missing > 0 or #invalid > 0 then
-        return false, missing, invalid
+        return {
+            success = false,
+            missing = missing,
+            invalid = invalid,
+        }
     end
 
-    return true, values
+    return {
+        success = true, 
+        values = values,
+    }
 end
 
-local function applyDefaultRequestFields(
-    request, defaultFields, drawRequest)
+local function applyDefaultRequestFields(input)
+    local request = input.request
+    local defaultFields = input.defaultFields
+    local drawRequest = input.drawRequest
 
     for field, defaultValue in pairs(defaultFields) do
 
@@ -108,33 +134,68 @@ local function applyDefaultRequestFields(
     end
 end
 
-local function createDrawRequest(request)
+local function calculateScale(input)
 
-    local ok, requiredInputs, missing, invalid =
-        validateRequestFields(request, SPRITE_REQUEST_REQUIRED)
+    local request = input.request
+    local pWidth = request.pWidth
+    local pHeight = request.pHeight
+    local spriteWidth = input.spriteWidth
+    local spriteHeight = input.spriteHeight
 
-    if not ok then
+    return {
+        scaleX = pWidth / spriteWidth,
+        scaleY = pHeight / spriteHeight,
+    }
+end
+
+local function createDrawRequest(input)
+
+    local request = input.request
+
+    local validateResult = validateRequestFields({
+        request = request, 
+        requiredFields = SPRITE_REQUEST_REQUIRED,
+    })
+
+    if not validateResult.success then
+        
+        local missing = validateResult.missing
         for _, field in ipairs(missing) do
-            print(Localize("sprite.lua.requestMissingProperty", field))
+            print(Localize("sprite.lua.requestMissingProperty", request.spriteName, request.spriteModId, field))
         end
 
+        local invalid = validateResult.invalid
         for _, invalidField in ipairs(invalid) do
             print(Localize("sprite.lua.requestInvalidPropertyType",
                 invalidField.field, invalidField.expected, invalidField.actual))
         end
 
-        return nil, false
+        return {
+            success = false,
+        }
     end
 
+    local requiredInputs = validateResult.values
     local spriteModId = request.spriteModId or Mods.CurrentId()
-    local spriteData = getSpriteData(requiredInputs.defName, spriteModId)
+    local spriteData = getSpriteData({
+        defName = requiredInputs.spriteName, 
+        modId = spriteModId,
+    }).sprite
+
+    local scale = calculateScale({
+        request = request,
+        spriteWidth = spriteData.width,
+        spriteHeight = spriteData.height,
+    })
 
     local resolvedOrder, existsLayer = 
         DrawLayers.TryGetLayerOrder(requiredInputs.layer)
 
     if not existsLayer then
         print(Localize("sprite.lua.invalidLayer", requiredInputs.layer))
-        return nil, false
+        return {
+            success = false,
+        }
     end
 
     local drawRequest =
@@ -143,23 +204,33 @@ local function createDrawRequest(request)
 
         textureId = spriteData.textureId,
 
-        x = requiredInputs.x,
-        y = requiredInputs.y,
+        x = requiredInputs.pX,
+        y = requiredInputs.pY,
 
         layerOrder = resolvedOrder,
 
-        width = request.width or spriteData.width,
-        height = request.height or spriteData.height,
+        width = spriteData.width,
+        height = spriteData.height,
 
         pivotX = request.pivotX or spriteData.pivotX,
         pivotY = request.pivotY or spriteData.pivotY,
+
+        scaleX = scale.scaleX,
+        scaleY = scale.scaleY,
     }
 
-    applyDefaultRequestFields(request, DRAW_REQUEST_DEFAULTS, drawRequest)
+    applyDefaultRequestFields({
+        request = request,
+        defaultFields = DRAW_REQUEST_DEFAULTS,
+        drawRequest = drawRequest,
+    })
 
-    return drawRequest, true
+    return {
+        success = true,
+        drawRequest = drawRequest
+    }
 end
 
 Sprite = Sprite or {}
 
-Sprite.CreateDrawRequest = createDrawRequest
+Sprite.CreateEngineDrawRequest = createDrawRequest

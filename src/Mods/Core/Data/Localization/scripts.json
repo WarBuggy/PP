@@ -34,7 +34,7 @@
                 "spriteValidation.lua.failedToCreateRuntimeField": "Failed to create runtime field '{2}' for sprite '{0}/{1}'",
                 "spriteValidation.lua.missingProperty": "Sprite '{0}/{1}' is missing required property '{2}'",
                 "spriteValidation.lua.invalidPropertyType": "Sprite '{0}/{1}' has invalid type for property '{2}'. Expected '{3}', got '{4}'",
-                "sprite.lua.missingProperty": "Sprite '{1}' from mod '{0}' is missing required property '{2}'",
+                "sprite.lua.requestMissingProperty": "Request to draw sprite '{0}' from mod '{1}' is missing required property '{2}'",
                 "drawLayer.lua.missingIndex": "Draw layer '{0}' is missing payload index",
                 "drawLayer.lua.notInitialized": "DrawLayers layerIndexMap not initialized before definitions were created",
                 "drawQueue.lua.noDrawRequestLedgerFound": "No draw request ledger found",
@@ -50,7 +50,6 @@
                 "world.lua.invalidPrimaryDimension": "Invalid world primaryDimension '{0}'. Expected 'width' or 'height'",
                 "world.lua.notInitialized": "World has not been initialized",
                 "world.lua.originNotInitialized": "World origin has not been initialized",
-                "base.lua.notInitialized": "Base has not been initialized",
                 "camera.lua.invalidMaxScreenWidthRatio": "Invalid maximum screen width ratio '{0}'. Expected a value greater than 0 and less than or equal to 1. Using the default value of {1} instead",
                 "camera.lua.invalidMaxScreenHeightRatio": "Invalid maximum screen height ratio '{0}'. Expected a value greater than 0 and less than or equal to 1. Using the default value of {1} instead",
                 "camera.lua.invalidAspectRatioFallback": "Failed to parse the viewport aspect ratio. Using the maximum viewport size instead",
@@ -58,11 +57,17 @@
                 "camera.lua.invalidVerticalAlignment": "Invalid vertical alignment '{0}'. Expected 'top', 'center', or 'bottom'. Using the default value '{1}' instead",
                 "camera.lua.worldNotInitialized": "World in viewport has not been initialized",
                 "camera.lua.viewportNotInitialized": "Viewport has not been initialized",
+                "cameraView.lua.positionNotInitialized": "Camera position has not been initialized",
                 "zoomLevelValidation.lua.invalidPropertyType": "Mod '{0}' zoom level '{1}' property '{2}' must be of type '{3}', but found '{4}'",
                 "zoomLevelValidation.lua.missingRequiredProperty": "Mod '{0}' zoom level '{1}' must define at least one of the following properties: {2}",
                 "zoomLevelValidation.lua.failedToCreateRuntimeField": "Mod '{0}' zoom level '{1}' failed to create runtime property '{2}'",
                 "zoomLevelValidation.lua.noZoomLevelListFound": "Failed to find runtime data 'zoomLevel.list'. Zoom level '{0}' could not be registered",
-                "zoomLevel.lua.zoomLevelListNotFound": "Failed to find runtime data 'zoomLevel.list'"
+                "zoomLevel.lua.zoomLevelListNotFound": "Zoom level list could not be found",
+                "zoomLevel.lua.notInitialized": "Zoom level has not been initialized",
+                "backdrop.lua.failedToCreateDrawRequest": "Failed to create backdrop draw request",
+                "backdrop.lua.failedToCreateEngineDrawRequests": "Failed to create backdrop engine draw request",
+                "backdrop.lua.engineDrawRequestNotFound": "Engine draw request not found for zoom level index '{0}'",
+                "base.lua.notInitialized": "Base has not been initialized"
             }
         }
     }

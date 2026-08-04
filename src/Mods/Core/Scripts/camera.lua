@@ -5,6 +5,7 @@ local defaultVerticalAlignment = "center"
 local defaultAspectRatio = "full"
 local _viewport = nil
 local _worldInPixel = nil
+local _position = nil
 
 local function loadSetting(input)
     return DefinitionHelper.LoadSetting(
@@ -40,6 +41,16 @@ local function loadSetting(input)
             params =
             {
                 primaryDimension = {},
+            }
+        },
+        {
+            targetDefType = "camera",
+            defName = "view",
+
+            params =
+            {
+                initialOffsetWorldOriginXInMeter = {},
+                initialOffsetWorldOriginYInMeter = {},
             }
         },
     })
@@ -200,6 +211,9 @@ local function calculateViewport(input)
         height = size.height,
     }
 
+    viewport.halfWidth = viewport.width / 2
+    viewport.halfHeight = viewport.height / 2
+
     viewport.left = viewport.x
     viewport.top = viewport.y
     viewport.right = viewport.x + viewport.width
@@ -241,8 +255,8 @@ local function calculateWorldInPixel(input)
 
     local worldOriginOffsetInMeter = World.GetOriginOffset()
     local pixelsPerMeter = worldWidth / worldSize.width
-    local originOffsetX = worldOriginOffsetInMeter.x * pixelsPerMeter
-    local originOffsetY = worldOriginOffsetInMeter.y * pixelsPerMeter
+    local originOffsetX = worldOriginOffsetInMeter.offsetX * pixelsPerMeter
+    local originOffsetY = worldOriginOffsetInMeter.offsetY * pixelsPerMeter
 
     return
     {
@@ -257,12 +271,29 @@ local function calculateWorldInPixel(input)
 
 end
 
+local function calculateInitialPosition(input)
+
+    local setting = input.setting
+    local worldOriginOffset = input.worldOriginOffset
+
+    return
+    {
+        x = worldOriginOffset.offsetX
+            + setting.initialOffsetWorldOriginXInMeter,
+
+        y = worldOriginOffset.offsetY
+            + setting.initialOffsetWorldOriginYInMeter,
+    }
+
+end
+
 local function init(input)
     
     local setting = loadSetting()
 
     local screenWidth = Screen.Width()
     local screenHeight = Screen.Height()
+    local worldOriginOffset = World.GetOriginOffset()
     
     _viewport = calculateViewport({
         screenWidth = screenWidth,
@@ -273,6 +304,34 @@ local function init(input)
     _worldInPixel = calculateWorldInPixel({
         setting = setting,
     })
+
+    _position = calculateInitialPosition({
+        setting = setting,
+        worldOriginOffset = worldOriginOffset,
+    })
+
+end
+
+local function transform(input)
+
+    local engineDrawRequest = input.engineDrawRequest
+
+    local zoomLevel = ZoomLevel.GetCurrent().zoomLevel
+    local cameraX = _position.x *
+        _worldInPixel.pixelsPerMeter * zoomLevel.multiplier
+
+    local cameraY = _position.y *
+        _worldInPixel.pixelsPerMeter * zoomLevel.multiplier
+
+    local cameraLeft = cameraX - _viewport.halfWidth
+
+    local cameraTop = cameraY - _viewport.halfHeight
+
+    engineDrawRequest.x = engineDrawRequest.x - 
+        cameraLeft + _viewport.left
+
+    engineDrawRequest.y = engineDrawRequest.y - 
+        cameraTop + _viewport.top
 
 end
 
@@ -294,8 +353,19 @@ local function getViewport()
     return _viewport
 end
 
+local function getPosition()
+
+    if _position == nil then
+        error(Localize("cameraView.lua.positionNotInitialized"))
+    end
+
+    return _position
+
+end
+
 Camera = Camera or {}
 
 Camera.Init = init
 Camera.GetWorldInPixel = getWorldInPixel
 Camera.GetViewport = getViewport
+Camera.Transform = transform

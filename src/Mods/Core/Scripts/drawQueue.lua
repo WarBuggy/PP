@@ -1,19 +1,27 @@
-function addToQueue(request)
+local function processAndQueue(input)
 
-    if type(request) ~= "table" then
+    local engineDrawRequest = input.engineDrawRequest
+
+    if type(engineDrawRequest) ~= "table" then
         print(Localize("system.drawRequests.requestMustBeTable"))
+        return
     end
+
+    local transformedRequest = WorldRenderer.Transform({
+        engineDrawRequest = engineDrawRequest,
+    }).transformedRequest
 
     local drawRequestLedger, exists =
         GameData.TryGet("drawRequest.list", "Core")
 
     if not exists or not drawRequestLedger then
         print(Localize("drawQueue.lua.noDrawRequestLedgerFound"))
+        return
     end
 
-    LedgerArray.InsertLast(drawRequestLedger, request)
-end
+    LedgerArray.InsertLast(drawRequestLedger, transformedRequest)
 
+end
 
 function addListToQueue(requests)
 
@@ -75,5 +83,5 @@ Events.OnDraw.Add(processDrawQueue)
 
 DrawQueue = DrawQueue or {}
 
-DrawQueue.AddToQueue = addToQueue
+DrawQueue.ProcessAndQueue = processAndQueue
 DrawQueue.AddListToQueue = addListToQueue
